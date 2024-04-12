@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -17,9 +19,9 @@ public class Images {
 
   @SneakyThrows
   Iterator<Image> find(File root) {
-    var items = new LinkedList<Path>();
+    var items = new LinkedBlockingQueue<Path>();
     var visitor = new Visitor(items);
-    Files.walkFileTree(root.toPath(), visitor);
+    Thread.ofVirtual().start(() -> run(root, visitor));
     return items.stream().map(it -> (Image) new Image.JPG(it.toFile().getName())).iterator();
   }
 
@@ -30,10 +32,15 @@ public class Images {
 
   }
 
+  @SneakyThrows
+  void run(File root, Visitor visitor) {
+    Files.walkFileTree(root.toPath(), visitor);
+  }
+
   @RequiredArgsConstructor
   class Visitor implements FileVisitor<Path> {
 
-    private final LinkedList<Path> queue;
+    private final BlockingQueue<Path> queue;
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
