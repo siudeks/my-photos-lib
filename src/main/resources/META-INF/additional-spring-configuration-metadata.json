@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "app.folders",
+  "type": "java.lang.String",
+  "description": "list of folders, separated by semicolon where application has to analyze media files"
+}]}
