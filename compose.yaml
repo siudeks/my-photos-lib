@@ -1,1 +1,16 @@
 services:
+  chroma-db:
+    image: chromadb/chroma
+    container_name: chroma-db
+    restart: always
+    # environment:
+    #   POSTGRES_USER: chroma_user
+    #   POSTGRES_PASSWORD: chroma_password
+    #   POSTGRES_DB: chroma_database
+    # volumes:
+    #   - chroma_data:/var/lib/postgresql/data
+    ports:
+      - 8000:8000
+volumes:
+  chroma_data:
+
