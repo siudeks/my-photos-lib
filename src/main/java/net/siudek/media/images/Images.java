@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -21,7 +20,7 @@ public class Images {
   Iterator<Image> find(File root) {
     var items = new LinkedBlockingQueue<Path>();
     var visitor = new Visitor(items);
-    Thread.ofVirtual().start(() -> run(root, visitor));
+    run(root, visitor);
     return items.stream().map(it -> (Image) new Image.JPG(it.toFile().getName())).iterator();
   }
 
