@@ -1,4 +1,4 @@
-package net.siudek.media;
+package net.siudek.media.host;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

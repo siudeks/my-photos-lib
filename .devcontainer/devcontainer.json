@@ -22,6 +22,11 @@
       "version": "none",
       "installMaven": "true",
       "installGradle": "false"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": true,
+      "installJupyterlab": true,
+      "version": "3.12"
     }
   },
   "mounts": [
@@ -40,7 +45,9 @@
       "extensions": [
         "editorconfig.editorconfig",
         "vscjava.vscode-java-pack",
-        "vmware.vscode-boot-dev-pack"
+        "vmware.vscode-boot-dev-pack",
+        "ms-python.python",
+        "ms-toolsai.jupyter"
       ]
     }
   }

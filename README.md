@@ -2,13 +2,19 @@
 ## Hints
 
 Check if Ollama is working
-Asusmption: OLLAMA_HOST points proper hots, in my case it is WSL ip address
+Assmption: OLLAMA_HOST points proper hots, in my case it is WSL ip address:
 curl http://$OLLAMA_HOST:11434/api/tags
 
 - check available updates:
   ```
   mvn versions:display-property-updates -ntp
   ```
+
+## run UI for Ollama:
+sudo docker run -d -p 3000:8080 \
+    -v open-webui:/app/backend/data \
+    --name open-webui \
+    ghcr.io/open-webui/open-webui:main
 
 ## Inspirations:
 - [I built an image search engine (Toutube)](https://www.youtube.com/watch?v=mBcBoGhFndY)

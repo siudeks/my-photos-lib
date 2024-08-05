@@ -1,0 +1,6 @@
+ollama==0.1.8
+
+# required to open heic files for display
+# pillow-heif==0.16.0
+pillow
+pyheif
