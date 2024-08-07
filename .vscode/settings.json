@@ -6,5 +6,6 @@
     "[java]": {
         "editor.tabSize": 2,
         "editor.detectIndentation": false
-    }
+    },
+    "python.analysis.typeCheckingMode": "basic"
 }
