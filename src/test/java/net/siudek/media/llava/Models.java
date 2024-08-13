@@ -2,6 +2,9 @@ package net.siudek.media.llava;
 
 import lombok.Getter;
 
+/**
+ * To define closed list of model used for work on images, we defined all of them in {@see Models} enum.
+ */
 public enum Models {
 
     /**
@@ -10,11 +13,13 @@ public enum Models {
      */
     // MxbaiEmbedLarge("mxbai-embed-large:latest"),
 
+    /** Used to convert images to its textual representation. */
     // https://ollama.com/library/llava/tags
     Llava("llava:34b-v1.6"),
 
+    /** Used to create embeddings based of textual representation of images. */
     // https://ollama.com/library/llama3.1/tags
-    Llama("llama3.1:70b-instruct-q4_0");
+    Llama("llama3.1:70b");
 
     @Getter
     private final String modelName;

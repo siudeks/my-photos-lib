@@ -1,12 +1,11 @@
 package net.siudek.media.images;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.ollama.api.OllamaApi.ChatResponse;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 
 @SpringBootTest(properties = {

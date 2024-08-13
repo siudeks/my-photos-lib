@@ -20,6 +20,7 @@ sudo docker run -d -p 3000:8080 \
 - [I built an image search engine (Toutube)](https://www.youtube.com/watch?v=mBcBoGhFndY)
 
 ## Links
+- https://www.youtube.com/watch?v=JTgl5GwrMu8
 - https://docs.spring.io/spring-ai/reference/api/clients/ollama-chat.html
 - [Improve ollama performance](https://github.com/ollama/ollama/issues/2742)
 - https://medium.com/@gabrielrodewald/running-models-with-ollama-step-by-step-60b6f6125807
