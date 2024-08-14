@@ -141,4 +141,15 @@ public class LlavaModuleTest {
     Assertions.assertThat(similarity1).as("Actual vs Expected:\n[%s]\n <> \n[%s]", sent1, sent2).isGreaterThan(0.90);
   }
 
+  @Test
+  void generateEmbeddings() {
+    var sent1 = "This is the first sentence.";
+    var sent2 = "This is the second sentence.";
+    var options = OllamaOptions.create().withModel("llama3.1:8b").withTemperature(0f);
+    var embed1m = embeddingModel.call(new EmbeddingRequest(List.of(sent1), options));
+    var embed2m = embeddingModel.call(new EmbeddingRequest(List.of(sent2), options));
+    var embed1 = embed1m.getResult().getOutput();
+    var embed2 = embed2m.getResult().getOutput();
+    var similarity = Similarity.cosine3(embed1, embed2);
+    Assertions.assertThat(similarity).as("Actual vs Expected:\n[%s]\n <> \n[%s]", sent1, sent2).isGreaterThan(0.90);  }
 }

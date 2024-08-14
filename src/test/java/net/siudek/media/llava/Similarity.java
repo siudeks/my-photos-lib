@@ -46,7 +46,7 @@ public class Similarity {
     *            user b's ratings
     * @return cosine similarity
     */
-   public static double cosineSim(double[] a, double[] b) {
+   public static double cosine2(double[] a, double[] b) {
        if (a == null || b == null || a.length < 1 || b.length < 1 || a.length != b.length)
            return Double.NaN;
 
@@ -61,4 +61,41 @@ public class Similarity {
 
        return sum / val;
    }
+
+
+   public static double cosine3(List<Double> vectorA, List<Double> vectorB) {
+    return cosine3(vectorA.stream().mapToDouble(it -> it).toArray(),
+        vectorB.stream().mapToDouble(it -> it).toArray());
+  }
+
+  static double cosine3(double[] vectorA, double[] vectorB) {
+    double dotProduct = 0.0;
+    double magnitudeA = 0.0;
+    double magnitudeB = 0.0;
+    
+    // Check if both vectors are of the same length
+    if (vectorA.length != vectorB.length) {
+        throw new IllegalArgumentException("Vectors must be of same length");
+    }
+    
+    // Calculate dot product and magnitudes
+    for (int i = 0; i < vectorA.length; i++) {
+        dotProduct += vectorA[i] * vectorB[i];
+        magnitudeA += Math.pow(vectorA[i], 2);
+        magnitudeB += Math.pow(vectorB[i], 2);
+    }
+    
+    // Calculate magnitudes
+    magnitudeA = Math.sqrt(magnitudeA);
+    magnitudeB = Math.sqrt(magnitudeB);
+    
+    // Check if magnitudes are not zero to prevent division by zero
+    if (magnitudeA == 0.0 || magnitudeB == 0.0) {
+        return 0.0;
+    }
+    
+    // Return cosine similarity
+    return dotProduct / (magnitudeA * magnitudeB);
+   }
+   
 }
