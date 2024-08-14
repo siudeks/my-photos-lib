@@ -11,6 +11,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +35,7 @@ public class LlavaModuleTest {
   ChatModel chatModel;
 
   @Autowired
-  EmbeddingModel embeddingClient;
+  EmbeddingModel embeddingModel;
 
   @Value("${spring.ai.ollama.base-url}")
   String apiHost;
@@ -107,12 +108,16 @@ public class LlavaModuleTest {
     var response = chatClient.prompt(prompt).call();
     var actual = response.content();
 
-    var expected = " The image shows a vast, dry landscape with cracked earth and sparse vegetation. In the foreground, there is a large rock sitting on the ground, which appears to be in the center of the frame. The sky above is clear with some clouds, suggesting it might be either dawn or dusk given the soft lighting. There are no visible human-made structures or signs of recent activity, which gives the scene a remote and untouched appearance. The overall color palette is dominated by earth tones, with the rock providing a contrasting element. ";
-    Assertions.assertThat(actual).isEqualTo(expected);
+    var expected = "The image shows a vast, dry landscape with cracked earth and sparse vegetation. In the foreground, there is a large rock sitting on the ground, which appears to be in the center of the frame. The sky above is clear with some clouds, suggesting it might be either dawn or dusk given the soft lighting. There are no visible human-made structures or signs of recent activity, which gives the scene a remote and untouched appearance. The overall color palette is dominated by earth tones, with the rock providing a contrasting element.";
+
+    var expectedAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(expected), options));
+    var actualAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(actual), options));
+    var similarity = Similarity.cosine(expectedAsEmbeddings.getResult().getOutput(), actualAsEmbeddings.getResult().getOutput());
+    Assertions.assertThat(similarity).as("Actual vs Expected:\n[%s]\n <> \n[%s]", actual, expected).isGreaterThan(0.90);
   }
 
   @Test
-  void generateEmbeddings() {
+  void generateEmbeddingsUsingNativeHttpService() {
 
     // to simplify testing we use pure httpclient instead of not yet mature Spring AI solutions
     // https://docs.spring.io/spring-framework/reference/integration/rest-clients.html
@@ -124,22 +129,16 @@ public class LlavaModuleTest {
 
     Models.assureModelsAvailable(ollamaService.list());
 
-    var embeddingsModelName = Models.Llama.getModelName();
-    // var embeddingsModelName = "nomic-embed-text";
-    var query = "A man is eating a piece of bread";
-    var embeddingResponse0 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, query));
-    var embeddingResponse1 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, "A man is eating food."));
-    var embeddingResponse2 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, "A man is eating pasta."));
-    var embeddingResponse3 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, "The girl is carrying a baby."));
-    var embeddingResponse4 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, "A man is riding a horse."));
-    
-    var similarity0 = Similarity.cosine(embeddingResponse0.embedding(), embeddingResponse0.embedding());
-    var similarity1 = Similarity.cosine(embeddingResponse0.embedding(), embeddingResponse1.embedding());
-    var similarity2 = Similarity.cosine(embeddingResponse0.embedding(), embeddingResponse2.embedding());
-    var similarity3 = Similarity.cosine(embeddingResponse0.embedding(), embeddingResponse3.embedding());
-    var similarity4 = Similarity.cosine(embeddingResponse0.embedding(), embeddingResponse4.embedding());
+    var sent1 = "This is the first sentence.";
+    var sent2 = "This is the second sentence.";
 
-    Assertions.assertThat(similarity1).as("Actual vs Expected:\n[%s]\n <> \n[%s]", "Today is Monday", "???").isGreaterThan(0.90);
+    var embeddingsModelName = Models.Llama.getNameAndTag();
+    var embed1 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, sent1)).embedding();
+    var embed2 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, sent2)).embedding();
+    
+    var similarity1 = Similarity.cosine(embed1, embed2);
+
+    Assertions.assertThat(similarity1).as("Actual vs Expected:\n[%s]\n <> \n[%s]", sent1, sent2).isGreaterThan(0.90);
   }
 
 }

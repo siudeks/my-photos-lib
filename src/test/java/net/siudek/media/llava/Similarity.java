@@ -25,15 +25,40 @@ public class Similarity {
    * @return 0 - 1, where 0 are different, 1 are identical
    */
   public static double cosine(double[] vectorA, double[] vectorB) {
-    var dotProduct = 0.0;
-    var normA = 0.0;
-    var normB = 0.0;
+    double dotProduct = 0.0;
+    double normA = 0.0;
+    double normB = 0.0;
     for (int i = 0; i < vectorA.length; i++) {
-      dotProduct += vectorA[i] * vectorB[i];
-      normA += Math.pow(vectorA[i], 2);
-      normB += Math.pow(vectorB[i], 2);
-    }
+        dotProduct += vectorA[i] * vectorB[i];
+        normA += Math.pow(vectorA[i], 2);
+        normB += Math.pow(vectorB[i], 2);
+    }   
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 
+    /**
+     * from  www.java2s.com
+    * Calculate the cosine similarity between two vectors
+    * 
+    * @param a
+    *            user a's ratings
+    * @param b
+    *            user b's ratings
+    * @return cosine similarity
+    */
+   public static double cosineSim(double[] a, double[] b) {
+       if (a == null || b == null || a.length < 1 || b.length < 1 || a.length != b.length)
+           return Double.NaN;
+
+       double sum = 0.0, sum_a = 0, sum_b = 0;
+       for (int i = 0; i < a.length; i++) {
+           sum += a[i] * b[i];
+           sum_a += a[i] * a[i];
+           sum_b += b[i] * b[i];
+       }
+
+       double val = Math.sqrt(sum_a) * Math.sqrt(sum_b);
+
+       return sum / val;
+   }
 }

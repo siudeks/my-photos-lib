@@ -19,10 +19,12 @@ public enum Models {
 
     /** Used to create embeddings based of textual representation of images. */
     // https://ollama.com/library/llama3.1/tags
-    Llama("llama3.1:70b");
+    Llama("llama3.1:8b");
 
     @Getter
     private final String modelName;
+
+    @Getter
     private final String nameAndTag;
 
     private Models(String nameAndTag) {
