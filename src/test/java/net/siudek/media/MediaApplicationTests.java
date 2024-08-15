@@ -14,4 +14,18 @@ class MediaApplicationTests {
 	void contextLoads() {
 	}
 
+  @Test
+  void happyPath() {
+
+    // 1. Locate files
+
+    // 2. Translate files to json descriptions using llava
+
+    // 3. Load json descriptions and translate them to embeddings using llama
+
+    // 4. Load embeddings with file info (location and llava text) into database
+
+    // 5. Check search by semantic
+  }
+
 }

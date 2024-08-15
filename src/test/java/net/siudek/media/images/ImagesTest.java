@@ -20,36 +20,39 @@ public class ImagesTest {
   File temp;
 
   @Test
-  void shouldFileFiles() {
+  void shouldFindFiles() {
 
     var dir = newDir("a",
         newJPG("image1"),
-        newDir("dir1"),
-        newJPG("image2"));
+        newDir("dir1", newPNG("image2")),
+        newHEIC("image3"));
     create(temp, dir);
 
     var search = new Images();
     var actualIter = search.find(temp);
     var actual = IteratorUtils.toList(actualIter);
 
-    Assertions.assertThat(actual).containsExactlyInAnyOrder(new Image.JPG("image1"), new Image.JPG("image2"));
+    Assertions.assertThat(actual).containsExactlyInAnyOrder(new Image.JPG("image1"), new Image.PNG("image2"), new Image.HEIC("image3"));
   }
 
   sealed interface DirOrFile {
 
-    sealed interface Image extends DirOrFile {
+    record Image(String name, String ext) implements DirOrFile { }
 
-      record JPG(String name) implements Image {
-      }
-    }
-
-    record Dir(String name, DirOrFile... images) implements DirOrFile {
-    }
+    record Dir(String name, DirOrFile... images) implements DirOrFile { }
 
   }
 
   DirOrFile.Image newJPG(String name) {
-    return new DirOrFile.Image.JPG(name);
+    return new DirOrFile.Image(name, "jpg");
+  }
+
+  DirOrFile.Image newPNG(String name) {
+    return new DirOrFile.Image(name, "png");
+  }
+
+  DirOrFile.Image newHEIC(String name) {
+    return new DirOrFile.Image(name, "heic");
   }
 
   DirOrFile.Dir newDir(String name, DirOrFile... images) {
@@ -59,24 +62,20 @@ public class ImagesTest {
   @SneakyThrows
   static void create(File root, DirOrFile.Dir dir) {
     var curDir = new File(root, dir.name);
-    curDir.mkdir();
+    curDir.mkdir(); // try to create current folder if it does not exist
     for (var f : dir.images()) {
-      if (f instanceof DirOrFile.Image.JPG i) {
-        Path file = Paths.get(curDir.getAbsolutePath(), i.name());
-        Files.touch(file.toFile());
-      } else if (f instanceof DirOrFile.Dir d) {
-        Path subdir = Paths.get(curDir.getAbsolutePath(), d.name());
-        subdir.toFile().mkdir();
-        create(subdir.toFile(), d);
-      }
-    }
-
-    for (var f : dir.images()) {
-      if (f instanceof DirOrFile.Image.JPG i) {
-        Path file = Paths.get(curDir.getAbsolutePath(), i.name());
-        Files.touch(file.toFile());
+      switch (f) {
+        case DirOrFile.Dir it: {
+          Path subdir = Paths.get(curDir.getAbsolutePath(), it.name());
+          subdir.toFile().mkdir();
+          create(subdir.toFile(), it);
+          break;
+        }
+        case DirOrFile.Image it: {
+          Path file = Paths.get(curDir.getAbsolutePath(), it.name());
+          Files.touch(file.toFile());
+        }
       }
     }
   }
-
 }

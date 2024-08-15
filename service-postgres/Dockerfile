@@ -17,10 +17,9 @@ RUN cd /pgvector && make && make install
 # Clean up
 RUN rm -rf /pgvector
 
-# Set environment variables
-ENV POSTGRES_USER=your_user
-ENV POSTGRES_PASSWORD=your_password
-ENV POSTGRES_DB=your_db
+# copy init script to well-know location. We use such script to add pgvector extension
+ADD ./scripts/1_init_pgvector.sql /docker-entrypoint-initdb.d/
+RUN chmod a+r /docker-entrypoint-initdb.d/*
 
 # Expose the PostgreSQL port
 EXPOSE 5432

@@ -14,6 +14,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+/**
+ * Finds and observes lifecycle of all images in requested folder(s). For each image identifies its state and applies next steps of image recognition.
+ */
 public class Images {
 
   @SneakyThrows
@@ -26,8 +29,9 @@ public class Images {
 
   sealed interface Image {
 
-    record JPG(String name) implements Image {
-    }
+    record JPG(String name) implements Image { }
+    record PNG(String name) implements Image { }
+    record HEIC(String name) implements Image { }
 
   }
 
@@ -37,7 +41,7 @@ public class Images {
   }
 
   @RequiredArgsConstructor
-  class Visitor implements FileVisitor<Path> {
+  final class Visitor implements FileVisitor<Path> {
 
     private final BlockingQueue<Path> queue;
 

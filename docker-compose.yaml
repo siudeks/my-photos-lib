@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   db:
     build: ./service-postgres
-    container_name: postgres_pgvector
+    container_name: postgres
     environment:
-      POSTGRES_USER: your_user
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
     ports:
       - "5432:5432"
     volumes:
