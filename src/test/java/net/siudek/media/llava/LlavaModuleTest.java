@@ -55,42 +55,15 @@ public class LlavaModuleTest {
 
     byte[] data = new ClassPathResource("llava/example1.jpg").getContentAsByteArray();
     String imageStr = Base64.getEncoder().encodeToString(data);
-    var llavaModelName = Models.Llava.getModelName();
-    var response2 = ollamaService.generate(new GenerateBody(llavaModelName, "Describe the photo.", false, new String[] { imageStr }));
+    var llavaModelName = Models.Llava_v16_p7b.getNameAndTag();
+    var response = ollamaService.generate(new GenerateBody(llavaModelName, "Describe the photo.", false, new String[] { imageStr }));
+    var responseText = response.response();
 
-    var embeddingsModelName = Models.Llama.getModelName();
-    var instruction = "Represent this sentence for searching relevant passages: ";
-    var query = "A man is eating a piece of bread";
-    var embeddingResponse1 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, "A man is eating food."));
+    var embeddingsModelName = Models.Llama_v31_p8b.getModelName();
+    var embeddingResponse1 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, responseText));
 
 
-    Assertions.assertThat(embeddingResponse1.embedding()).hasSize(1024);
-
-        // .call(new EmbeddingRequest(
-        //     // List.of(instruction + query,
-        //     List.of(query,
-        //             mixedbread-ai/mxbai-embed-large-v1,
-        //             "A man is eating pasta.",
-        //             "The girl is carrying a baby.",
-        //             "A man is riding a horse."),
-        //     OllamaOptions.create().withModel(embeddingsModelName)));
-    // var results = embeddingResponse1.getResults();
-
-    // var embeddings_q = results.get(0).getOutput();
-    // var embeddings_1 = results.get(1).getOutput();
-    // var embeddings_2 = results.get(2).getOutput();
-    // var embeddings_3 = results.get(3).getOutput();
-    // var embeddings_4 = results.get(4).getOutput();
-
-    // var similarity0 = Similarity.cosine(embeddings_q, embeddings_q);
-    // var similarity1 = Similarity.cosine(embeddings_q, embeddings_1);
-    // var similarity2 = Similarity.cosine(embeddings_q, embeddings_2);
-    // var similarity3 = Similarity.cosine(embeddings_q, embeddings_3);
-    // var similarity4 = Similarity.cosine(embeddings_q, embeddings_4);
-
-    // Assertions.assertThat(similarity1).as("Actual vs Expected:\n[%s]\n <> \n[%s]", "Today is Monday", "???").isGreaterThan(0.90);
-
-    // Assertions.assertThat(response2).isEqualTo("SPARTAA");
+    Assertions.assertThat(embeddingResponse1.embedding()).hasSize(4096);
   }
 
   @Test
@@ -100,18 +73,19 @@ public class LlavaModuleTest {
   void useSpringAi() {
     byte[] data = new ClassPathResource("llava/example1.jpg").getContentAsByteArray();
     var userMessage = new UserMessage("Explain what do you see on this picture?", List.of(new Media(MimeTypeUtils.IMAGE_JPEG, data)));
-    var options = OllamaOptions.create().withModel("llava").withTemperature(0f);
-    var prompt = new Prompt(userMessage, options);
+    var options1 = OllamaOptions.create().withModel(Models.Llava_v16_p7b.getNameAndTag()).withTemperature(0f);
+    var prompt = new Prompt(userMessage, options1);
 
-    var chatClient = ChatClient.builder(chatModel).defaultOptions(options).build();
+    var chatClient = ChatClient.builder(chatModel).defaultOptions(options1).build();
     
     var response = chatClient.prompt(prompt).call();
     var actual = response.content();
 
     var expected = "The image shows a vast, dry landscape with cracked earth and sparse vegetation. In the foreground, there is a large rock sitting on the ground, which appears to be in the center of the frame. The sky above is clear with some clouds, suggesting it might be either dawn or dusk given the soft lighting. There are no visible human-made structures or signs of recent activity, which gives the scene a remote and untouched appearance. The overall color palette is dominated by earth tones, with the rock providing a contrasting element.";
 
-    var expectedAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(expected), options));
-    var actualAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(actual), options));
+    var options2 = OllamaOptions.create().withModel(Models.Llama_v31_p8b.getNameAndTag()).withTemperature(0f);
+    var expectedAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(expected), options2));
+    var actualAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(actual), options2));
     var similarity = Similarity.cosine(expectedAsEmbeddings.getResult().getOutput(), actualAsEmbeddings.getResult().getOutput());
     Assertions.assertThat(similarity).as("Actual vs Expected:\n[%s]\n <> \n[%s]", actual, expected).isGreaterThan(0.90);
   }
@@ -132,7 +106,7 @@ public class LlavaModuleTest {
     var sent1 = "This is the first sentence.";
     var sent2 = "This is the second sentence.";
 
-    var embeddingsModelName = Models.Llama.getNameAndTag();
+    var embeddingsModelName = Models.Llama_v31_p8b.getNameAndTag();
     var embed1 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, sent1)).embedding();
     var embed2 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, sent2)).embedding();
     

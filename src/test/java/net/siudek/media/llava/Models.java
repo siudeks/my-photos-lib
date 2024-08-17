@@ -15,11 +15,11 @@ public enum Models {
 
     /** Used to convert images to its textual representation. */
     // https://ollama.com/library/llava/tags
-    Llava("llava:34b-v1.6"),
+    Llava_v16_p7b("llava:7b-v1.6"),
 
     /** Used to create embeddings based of textual representation of images. */
     // https://ollama.com/library/llama3.1/tags
-    Llama("llama3.1:8b");
+    Llama_v31_p8b("llama3.1:8b");
 
     @Getter
     private final String modelName;
