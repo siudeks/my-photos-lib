@@ -1,4 +1,4 @@
-package net.siudek.media;
+package net.siudek.media.host;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +15,8 @@ class MediaApplicationTests {
 	}
 
   @Test
-  void happyPath() {
+  void 
+  happyPath() {
 
     // 1. Locate files
 
