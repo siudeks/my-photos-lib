@@ -19,7 +19,9 @@ public enum Models {
 
     /** Used to create embeddings based of textual representation of images. */
     // https://ollama.com/library/llama3.1/tags
-    Llama_v31_p8b("llama3.1:8b");
+    Llama_v31_p8b("llama3.1:8b"),
+
+    mxbai_embed_large("mxbai-embed-large:335m-v1-fp16");
 
     @Getter
     private final String modelName;

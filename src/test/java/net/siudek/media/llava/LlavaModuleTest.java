@@ -2,6 +2,7 @@ package net.siudek.media.llava;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -81,13 +82,13 @@ public class LlavaModuleTest {
     var response = chatClient.prompt(prompt).call();
     var actual = response.content();
 
-    var expected = "The image shows a vast, dry landscape with cracked earth and sparse vegetation. In the foreground, there is a large rock sitting on the ground, which appears to be in the center of the frame. The sky above is clear with some clouds, suggesting it might be either dawn or dusk given the soft lighting. There are no visible human-made structures or signs of recent activity, which gives the scene a remote and untouched appearance. The overall color palette is dominated by earth tones, with the rock providing a contrasting element.";
+    var expected_v1 = "The image shows dry landscape with cracked earth and sparse vegetation. In the foreground, there is a large rock sitting on the ground, which appears to be in the center of the frame. The sky above is clear with some clouds, suggesting it might be either dawn or dusk given the soft lighting. There are no visible human-made structures or signs of recent activity, which gives the scene a remote and untouched appearance. The overall color palette is dominated by earth tones, with the rock providing a contrasting element.";
+    var expected_v2 = "The image shows dry landscape with cracked earth and sparse vegetation. There is a large rock sitting on the ground. The sky above is clear with some clouds. The overall color palette is dominated by earth tones, with the rock providing a contrasting element.";
 
-    var options2 = OllamaOptions.create().withModel(Models.Llama_v31_p8b.getNameAndTag()).withTemperature(0f);
-    var expectedAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(expected), options2));
-    var actualAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(actual), options2));
-    var similarity = Similarity.cosine(expectedAsEmbeddings.getResult().getOutput(), actualAsEmbeddings.getResult().getOutput());
-    Assertions.assertThat(similarity).as("Actual vs Expected:\n[%s]\n <> \n[%s]", actual, expected).isGreaterThan(0.90);
+    Stream.of(expected_v1, expected_v2).forEach(expected -> {
+      var similarity = similarity(actual, expected, Models.mxbai_embed_large);
+      Assertions.assertThat(similarity).as("Actual vs Expected:\n[%s]\n <> \n[%s]", actual, expected_v1).isGreaterThan(0.95);
+    });
   }
 
   @Test
@@ -125,5 +126,14 @@ public class LlavaModuleTest {
     var embed1 = embed1m.getResult().getOutput();
     var embed2 = embed2m.getResult().getOutput();
     var similarity = Similarity.cosine3(embed1, embed2);
-    Assertions.assertThat(similarity).as("Actual vs Expected:\n[%s]\n <> \n[%s]", sent1, sent2).isGreaterThan(0.90);  }
+    Assertions.assertThat(similarity).as("Actual vs Expected:\n[%s]\n <> \n[%s]", sent1, sent2).isGreaterThan(0.90);
+  }
+
+  double similarity(String actual, String expected, Models model) {
+    var options2 = OllamaOptions.create().withModel(model.getNameAndTag()).withTemperature(0f);
+    var expectedAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(expected), options2));
+    var actualAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(actual), options2));
+    return Similarity.cosine(expectedAsEmbeddings.getResult().getOutput(), actualAsEmbeddings.getResult().getOutput());
+  }
+
 }
