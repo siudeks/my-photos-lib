@@ -1,5 +1,8 @@
 package net.siudek.media.host;
 
+import java.nio.file.Path;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -17,6 +20,9 @@ class MediaApplicationTests {
   @Test
   void 
   happyPath() {
+
+    var path = Path.of("./data");
+    Assertions.assertThat(path.toFile()).exists();
 
     // 1. Locate files
 
