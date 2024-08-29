@@ -19,40 +19,47 @@ public class ImagesTest {
   @TempDir
   File temp;
 
+
   @Test
   void shouldFindFiles() {
-
-    var dir = newDir("a",
-        newJPG("image1"),
-        newDir("dir1", newPNG("image2")),
-        newHEIC("image3"));
-    create(temp, dir);
+    var dirSchema = newDir("rootDir",
+        newImage("image1.jpg"),
+        newDir("dir1", newImage("image2.png")),
+        newImage("image3.heic"));
+    create(temp, dirSchema);
 
     var search = new Images();
     var actualIter = search.find(temp);
     var actual = IteratorUtils.toList(actualIter);
 
-    Assertions.assertThat(actual).containsExactlyInAnyOrder(new Image.JPG("image1"), new Image.PNG("image2"), new Image.HEIC("image3"));
+    Assertions.assertThat(actual)
+      .as("Finds all images in cluding those located in subfolders")
+      .containsExactlyInAnyOrder(new Image.JPG("image1"), new Image.PNG("image2"), new Image.HEIC("image3"));
+  }
+
+  @Test
+  void shouldFindDataFiles() {
+    var exampleMediaDir = Path.of("./data");
+
+    var search = new Images();
+    var actualIter = search.find(exampleMediaDir.toFile());
+    var actual = IteratorUtils.toList(actualIter);
+
+    Assertions.assertThat(actual)
+      .as("Finds all images in cluding those located in subfolders")
+      .containsExactlyInAnyOrder(new Image.JPG("vegetables"), new Image.PNG("cat"), new Image.HEIC("dog"));
   }
 
   sealed interface DirOrFile {
 
-    record Image(String name, String ext) implements DirOrFile { }
+    record Image(String name) implements DirOrFile { }
 
     record Dir(String name, DirOrFile... images) implements DirOrFile { }
 
   }
 
-  DirOrFile.Image newJPG(String name) {
-    return new DirOrFile.Image(name, "jpg");
-  }
-
-  DirOrFile.Image newPNG(String name) {
-    return new DirOrFile.Image(name, "png");
-  }
-
-  DirOrFile.Image newHEIC(String name) {
-    return new DirOrFile.Image(name, "heic");
+  DirOrFile.Image newImage(String name) {
+    return new DirOrFile.Image(name);
   }
 
   DirOrFile.Dir newDir(String name, DirOrFile... images) {
@@ -72,7 +79,7 @@ public class ImagesTest {
           break;
         }
         case DirOrFile.Image it: {
-          Path file = Paths.get(curDir.getAbsolutePath(), it.name());
+          var file = Paths.get(curDir.getAbsolutePath(), it.name());
           Files.touch(file.toFile());
         }
       }

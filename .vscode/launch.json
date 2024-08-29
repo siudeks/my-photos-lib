@@ -9,6 +9,16 @@
       "name": "Current File",
       "request": "launch",
       "mainClass": "net.siudek.media.MediaApplication"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-MediaApplication<media>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "net.siudek.media.host.MediaApplication",
+      "projectName": "media",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

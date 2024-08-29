@@ -8,8 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -24,15 +28,38 @@ public class Images {
     var items = new LinkedBlockingQueue<Path>();
     var visitor = new Visitor(items);
     run(root, visitor);
-    return items.stream().map(it -> (Image) new Image.JPG(it.toFile().getName())).iterator();
+    return items.stream().map(this::asImage).iterator();
+  }
+
+  @SneakyThrows
+  Image asImage(Path image) {
+    var filename = asFileName(image);
+    var name = filename.name();
+    var ext = filename.ext();
+    var extension = Files.probeContentType(image);
+    return switch (ext) {
+      case "jpg" -> new Image.JPG(name);
+      case "png" -> new Image.PNG(name);
+      case "heic" -> new Image.HEIC(name);
+      default -> throw new IllegalArgumentException("extension [" + extension + "] is not supported.");
+    };
+  }
+
+  static Filename asFileName(Path image) {
+    var asFile = image.toFile();
+    var imageName = asFile.getName();
+    var name = FilenameUtils.getBaseName(imageName);
+    var ext = FilenameUtils.getExtension(imageName);
+    return new Filename(name, ext);
+  }
+
+  record Filename(String name, String ext) {
   }
 
   sealed interface Image {
-
-    record JPG(String name) implements Image { }
-    record PNG(String name) implements Image { }
-    record HEIC(String name) implements Image { }
-
+    record JPG(String fileName) implements Image { }
+    record PNG(String fileName) implements Image { }
+    record HEIC(String fileName) implements Image { }
   }
 
   @SneakyThrows
