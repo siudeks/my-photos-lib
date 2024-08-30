@@ -44,7 +44,7 @@ public class ImagesTest {
     var images = IteratorUtils.toList(actualIter);
 
     for (var image: images) {
-      var asBase64 = Images.asBase64(image);
+      var asBase64 = Images.asJpegBase64(image);
     }
   }
 

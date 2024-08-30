@@ -121,7 +121,11 @@
       <groupId>com.github.gotson.nightmonkeys</groupId>
       <artifactId>imageio-common</artifactId>
       <version>${gotson-nightmonkeys.version}</version>
-      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.gotson.nightmonkeys</groupId>
+      <artifactId>imageio-heif</artifactId>
+      <version>${gotson-nightmonkeys.version}</version>
     </dependency>
 
     <dependency>

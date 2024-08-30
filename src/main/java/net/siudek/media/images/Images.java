@@ -1,5 +1,7 @@
 package net.siudek.media.images;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -14,6 +16,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageInputStreamImpl;
 import javax.naming.OperationNotSupportedException;
 
 import lombok.RequiredArgsConstructor;
@@ -47,11 +51,11 @@ public class Images {
 
   sealed interface Image {
 
-    Path fileName();
+    Path path();
 
-    record JPG(Path fileName) implements Image { }
-    record PNG(Path fileName) implements Image { }
-    record HEIC(Path fileName) implements Image { }
+    record JPG(Path path) implements Image { }
+    record PNG(Path path) implements Image { }
+    record HEIC(Path path) implements Image { }
   }
 
   @SneakyThrows
@@ -89,17 +93,20 @@ public class Images {
 
   /* Converts (in memory) given file to JPG representation, and then to Base64. */
   @SneakyThrows
-  public static String asBase64(Image image) {
-    try (var asStream = ImageIO.createImageInputStream(image.fileName().toFile())) {
-      var bufferSize = asStream.length();
-      var asBytes = new byte[(int) bufferSize];
-      asStream.readFully(asBytes);
-      var asJpg = switch(image) {
-        case Image.JPG it -> Base64.getEncoder().encodeToString(asBytes);
-        case Image.PNG it -> throw new OperationNotSupportedException();
-        case Image.HEIC it -> throw new OperationNotSupportedException();
-      };
-      return asJpg;
-    }
+  public static String asJpegBase64(Image image) {
+    var asBytes = Files.readAllBytes(image.path());
+    var asStream = new ByteArrayInputStream(asBytes);
+    var bufferedImage = ImageIO.read(asStream);
+
+    var formatName = switch(image) {
+      case Image.JPG it -> "jpeg";
+      case Image.PNG it -> "png";
+      case Image.HEIC it -> "heic";
+    };
+
+    var binaryOut = new ByteArrayOutputStream();
+    ImageIO.write(bufferedImage, formatName, binaryOut);
+
+    return Base64.getEncoder().encodeToString(binaryOut.toByteArray());
   }
 }
