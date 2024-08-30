@@ -7,16 +7,18 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
+import javax.imageio.ImageIO;
+import javax.naming.OperationNotSupportedException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import net.siudek.media.utils.FileUtils;
 
 /**
  * Finds and observes lifecycle of all images in requested folder(s). For each image identifies its state and applies next steps of image recognition.
@@ -24,42 +26,32 @@ import lombok.SneakyThrows;
 public class Images {
 
   @SneakyThrows
-  Iterator<Image> find(File root) {
+  public Iterator<Image> find(File root) {
     var items = new LinkedBlockingQueue<Path>();
     var visitor = new Visitor(items);
     run(root, visitor);
-    return items.stream().map(this::asImage).iterator();
+    return items.stream().map(Images::asImage).iterator();
   }
 
   @SneakyThrows
-  Image asImage(Path image) {
-    var filename = asFileName(image);
-    var name = filename.name();
-    var ext = filename.ext();
+  public static Image asImage(Path image) {
+    var ext = FileUtils.asFilename(image, it -> it.ext());
     var extension = Files.probeContentType(image);
     return switch (ext) {
-      case "jpg" -> new Image.JPG(name);
-      case "png" -> new Image.PNG(name);
-      case "heic" -> new Image.HEIC(name);
+      case "jpg" -> new Image.JPG(image);
+      case "png" -> new Image.PNG(image);
+      case "heic" -> new Image.HEIC(image);
       default -> throw new IllegalArgumentException("extension [" + extension + "] is not supported.");
     };
   }
 
-  static Filename asFileName(Path image) {
-    var asFile = image.toFile();
-    var imageName = asFile.getName();
-    var name = FilenameUtils.getBaseName(imageName);
-    var ext = FilenameUtils.getExtension(imageName);
-    return new Filename(name, ext);
-  }
-
-  record Filename(String name, String ext) {
-  }
-
   sealed interface Image {
-    record JPG(String fileName) implements Image { }
-    record PNG(String fileName) implements Image { }
-    record HEIC(String fileName) implements Image { }
+
+    Path fileName();
+
+    record JPG(Path fileName) implements Image { }
+    record PNG(Path fileName) implements Image { }
+    record HEIC(Path fileName) implements Image { }
   }
 
   @SneakyThrows
@@ -93,5 +85,21 @@ public class Images {
       return FileVisitResult.CONTINUE;
     }
 
+  }
+
+  /* Converts (in memory) given file to JPG representation, and then to Base64. */
+  @SneakyThrows
+  public static String asBase64(Image image) {
+    try (var asStream = ImageIO.createImageInputStream(image.fileName().toFile())) {
+      var bufferSize = asStream.length();
+      var asBytes = new byte[(int) bufferSize];
+      asStream.readFully(asBytes);
+      var asJpg = switch(image) {
+        case Image.JPG it -> Base64.getEncoder().encodeToString(asBytes);
+        case Image.PNG it -> throw new OperationNotSupportedException();
+        case Image.HEIC it -> throw new OperationNotSupportedException();
+      };
+      return asJpg;
+    }
   }
 }

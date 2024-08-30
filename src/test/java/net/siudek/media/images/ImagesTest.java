@@ -3,6 +3,8 @@ package net.siudek.media.images;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.collections4.IteratorUtils;
 import org.assertj.core.api.Assertions;
@@ -16,38 +18,34 @@ import net.siudek.media.images.Images.Image;
 
 public class ImagesTest {
 
-  @TempDir
-  File temp;
-
-
   @Test
-  void shouldFindFiles() {
+  void shouldFindMediaFiles(@TempDir File temp) {
+    // some list of files, to include subfolder and all image types which should be supported
     var dirSchema = newDir("rootDir",
         newImage("image1.jpg"),
         newDir("dir1", newImage("image2.png")),
         newImage("image3.heic"));
-    create(temp, dirSchema);
+    var expected = create(temp, dirSchema);
 
-    var search = new Images();
-    var actualIter = search.find(temp);
+    var actualIter = new Images().find(temp);
     var actual = IteratorUtils.toList(actualIter);
 
+
     Assertions.assertThat(actual)
-      .as("Finds all images in cluding those located in subfolders")
-      .containsExactlyInAnyOrder(new Image.JPG("image1"), new Image.PNG("image2"), new Image.HEIC("image3"));
+      .as("Finds all images including those located in subfolders")
+      .containsExactlyInAnyOrderElementsOf(expected);
   }
 
   @Test
-  void shouldFindDataFiles() {
+  void shouldProcessExampleFiles() {
     var exampleMediaDir = Path.of("./data");
 
-    var search = new Images();
-    var actualIter = search.find(exampleMediaDir.toFile());
-    var actual = IteratorUtils.toList(actualIter);
+    var actualIter = new Images().find(exampleMediaDir.toFile());
+    var images = IteratorUtils.toList(actualIter);
 
-    Assertions.assertThat(actual)
-      .as("Finds all images in cluding those located in subfolders")
-      .containsExactlyInAnyOrder(new Image.JPG("vegetables"), new Image.PNG("cat"), new Image.HEIC("dog"));
+    for (var image: images) {
+      var asBase64 = Images.asBase64(image);
+    }
   }
 
   sealed interface DirOrFile {
@@ -66,8 +64,13 @@ public class ImagesTest {
     return new DirOrFile.Dir(name, images);
   }
 
+  // creates requested list of files and returns expected list of images 
+  static Collection<Image> create(File root, DirOrFile.Dir dir) {
+    return create(root, dir, new ArrayList<>());
+  }
+
   @SneakyThrows
-  static void create(File root, DirOrFile.Dir dir) {
+  static Collection<Image> create(File root, DirOrFile.Dir dir, Collection<Image> expected) {
     var curDir = new File(root, dir.name);
     curDir.mkdir(); // try to create current folder if it does not exist
     for (var f : dir.images()) {
@@ -75,14 +78,17 @@ public class ImagesTest {
         case DirOrFile.Dir it: {
           Path subdir = Paths.get(curDir.getAbsolutePath(), it.name());
           subdir.toFile().mkdir();
-          create(subdir.toFile(), it);
+          create(subdir.toFile(), it, expected);
           break;
         }
         case DirOrFile.Image it: {
-          var file = Paths.get(curDir.getAbsolutePath(), it.name());
-          Files.touch(file.toFile());
+          var asPath = Paths.get(curDir.getAbsolutePath(), it.name());
+          Files.touch(asPath.toFile());
+          var asImage = Images.asImage(asPath);
+          expected.add(asImage);
         }
       }
     }
+    return expected;
   }
 }
