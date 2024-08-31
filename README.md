@@ -20,6 +20,7 @@ sudo docker run -d -p 3000:8080 \
 - [I built an image search engine (Toutube)](https://www.youtube.com/watch?v=mBcBoGhFndY)
 
 ## Links
+- [gotson nightmonkeys](https://github.com/gotson/NightMonkeys) to read jpg, png and heic images (java 22 required - see docs, --enable-native-access=ALL-UNNAMED as run arg)
 - https://www.youtube.com/watch?v=JTgl5GwrMu8
 - https://docs.spring.io/spring-ai/reference/api/clients/ollama-chat.html
 - [Improve ollama performance](https://github.com/ollama/ollama/issues/2742)

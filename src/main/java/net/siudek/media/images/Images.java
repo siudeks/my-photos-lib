@@ -96,6 +96,7 @@ public class Images {
   public static String asJpegBase64(Image image) {
     var asBytes = Files.readAllBytes(image.path());
     var asStream = new ByteArrayInputStream(asBytes);
+
     var bufferedImage = ImageIO.read(asStream);
 
     var formatName = switch(image) {

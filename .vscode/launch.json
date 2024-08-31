@@ -9,7 +9,7 @@
             "name": "MediaApplication",
             "request": "launch",
             "mainClass": "net.siudek.media.host.MediaApplication",
-            "projectName": "media"
+            "projectName": "media",
         }
     ]
 }

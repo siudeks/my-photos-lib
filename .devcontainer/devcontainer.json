@@ -19,7 +19,9 @@
       "dockerDashComposeVersion": "v2"
     },
     "ghcr.io/devcontainers/features/java:1": {
-      "version": "none",
+      // version and jdkDistro values comes from values displyed as output of 'sdk list java'
+      "version": "22.0.2",
+      "jdkDistro": "librca",
       "installMaven": "true",
       "installGradle": "false"
     },

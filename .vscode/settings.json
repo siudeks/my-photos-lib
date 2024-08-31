@@ -7,5 +7,11 @@
         "editor.tabSize": 2,
         "editor.detectIndentation": false
     },
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "java.test.config": {
+      "vmArgs": [
+        "--enable-native-access=ALL-UNNAMED",
+        "-Djava.library.path=/usr/lib/x86_64-linux-gnu/"
+      ],
+    }
 }
