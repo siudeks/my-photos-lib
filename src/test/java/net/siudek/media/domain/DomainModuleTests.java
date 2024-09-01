@@ -33,8 +33,15 @@ public class DomainModuleTests {
   }
 
   @Test
-  void shouldProcessSingleFile() {
-    var files = fileView.find("Image wit ha dog");
+  void shouldFindNoFile() {
+    var files = fileView.find("Image with a bird");
+
+    Assertions.assertThat(files).isEmpty();
+  }
+
+  @Test
+  void shouldFindDogFile() {
+    var files = fileView.find("Image with a dog");
 
     Assertions.assertThat(files).containsExactly(new Image.HEIC(dogHeic.toPath()));
   }
