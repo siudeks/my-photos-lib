@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import net.siudek.media.domain.Image;
 import net.siudek.media.utils.FileUtils;
 
 /**
@@ -45,15 +46,6 @@ public class Images {
       case "heic" -> new Image.HEIC(image);
       default -> throw new IllegalArgumentException("extension [" + extension + "] is not supported.");
     };
-  }
-
-  sealed interface Image {
-
-    Path path();
-
-    record JPG(Path path) implements Image { }
-    record PNG(Path path) implements Image { }
-    record HEIC(Path path) implements Image { }
   }
 
   @SneakyThrows

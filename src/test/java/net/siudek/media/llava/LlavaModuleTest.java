@@ -8,12 +8,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.Media;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingRequest;
+import org.springframework.ai.model.Media;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +31,6 @@ import net.siudek.media.llava.OllamaPort.EmbeddingsBody;
 
 @SpringBootTest(classes = MediaApplication.class)
 @ActiveProfiles("test")
-@Disabled
   public class LlavaModuleTest {
 
   @Autowired
@@ -74,7 +73,7 @@ import net.siudek.media.llava.OllamaPort.EmbeddingsBody;
   // not yet available
   // https://github.com/spring-projects/spring-ai/issues/421
   void useSpringAi() {
-    byte[] data = new ClassPathResource("llava/example1.jpg").getContentAsByteArray();
+    var data = new ClassPathResource("llava/example1.jpg");
     var userMessage = new UserMessage("Explain what do you see on this picture?", List.of(new Media(MimeTypeUtils.IMAGE_JPEG, data)));
     var options1 = OllamaOptions.create().withModel(Models.Llava_v16_p7b.getNameAndTag()).withTemperature(0f);
     var prompt = new Prompt(userMessage, options1);
@@ -135,7 +134,7 @@ import net.siudek.media.llava.OllamaPort.EmbeddingsBody;
     var options2 = OllamaOptions.create().withModel(model.getNameAndTag()).withTemperature(0f);
     var expectedAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(expected), options2));
     var actualAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(actual), options2));
-    return Similarity.cosine(expectedAsEmbeddings.getResult().getOutput(), actualAsEmbeddings.getResult().getOutput());
+    return Similarity.cosine3(expectedAsEmbeddings.getResult().getOutput(), actualAsEmbeddings.getResult().getOutput());
   }
 
 }

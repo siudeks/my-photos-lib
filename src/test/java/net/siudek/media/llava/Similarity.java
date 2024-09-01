@@ -68,6 +68,17 @@ public class Similarity {
         vectorB.stream().mapToDouble(it -> it).toArray());
   }
 
+  static double cosine3(float[] vectorA, float[] vectorB) {
+    return cosine3(asDoubleArr(vectorA), asDoubleArr(vectorB));
+  }
+
+  public static double[] asDoubleArr(float[] input) {
+    var output = new double[input.length];
+    for (int i = 0; i < input.length; i++)
+        output[i] = input[i];
+    return output;
+}
+
   static double cosine3(double[] vectorA, double[] vectorB) {
     double dotProduct = 0.0;
     double magnitudeA = 0.0;

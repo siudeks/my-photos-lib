@@ -18,7 +18,7 @@ import org.junit.jupiter.api.io.TempDir;
 import com.tngtech.archunit.thirdparty.com.google.common.io.Files;
 
 import lombok.SneakyThrows;
-import net.siudek.media.images.Images.Image;
+import net.siudek.media.domain.Image;
 
 public class ImagesTest {
 
@@ -51,6 +51,7 @@ public class ImagesTest {
     
 
     for (var image: images) {
+      @SuppressWarnings("unused")
       var asBase64 = Images.asJpegBase64(image);
     }
   }
