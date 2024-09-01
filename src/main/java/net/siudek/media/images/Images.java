@@ -11,14 +11,12 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Base64;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.ImageInputStreamImpl;
-import javax.naming.OperationNotSupportedException;
+
+import org.springframework.util.Assert;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -98,6 +96,7 @@ public class Images {
     var asStream = new ByteArrayInputStream(asBytes);
 
     var bufferedImage = ImageIO.read(asStream);
+    Assert.notNull(bufferedImage, () -> "Image " + image + " can't be converted to BufferedImage");
 
     var formatName = switch(image) {
       case Image.JPG it -> "jpeg";

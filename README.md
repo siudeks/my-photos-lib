@@ -1,7 +1,7 @@
 
 ## Hints
 
-Check if Ollama is working
+### Ollama dependency: Check if Ollama is working
 Assmption: OLLAMA_HOST points proper hots, in my case it is WSL ip address:
 curl http://$OLLAMA_HOST:11434/api/tags
 
@@ -9,6 +9,14 @@ curl http://$OLLAMA_HOST:11434/api/tags
   ```
   mvn versions:display-property-updates -ntp
   ```
+
+### Dockerized dependencies:
+Remember to run **docker compose up** before starting application or tests.
+
+### Run from CLI
+Application needs to have access to libheif, so you have to add extra application path
+-Djava.library.path=/usr/lib/x86_64-linux-gnu/
+as application is linked with libheif
 
 ## run UI for Ollama:
 sudo docker run -d -p 3000:8080 \
@@ -20,7 +28,7 @@ sudo docker run -d -p 3000:8080 \
 - [I built an image search engine (Toutube)](https://www.youtube.com/watch?v=mBcBoGhFndY)
 
 ## Links
-- [gotson nightmonkeys](https://github.com/gotson/NightMonkeys) to read jpg, png and heic images (java 22 required - see docs, --enable-native-access=ALL-UNNAMED as run arg)
+- [gotson nightmonkeys](https://github.com/gotson/NightMonkeys) to read jpg, png and heic images (java 22 required - see docs)
 - https://www.youtube.com/watch?v=JTgl5GwrMu8
 - https://docs.spring.io/spring-ai/reference/api/clients/ollama-chat.html
 - [Improve ollama performance](https://github.com/ollama/ollama/issues/2742)

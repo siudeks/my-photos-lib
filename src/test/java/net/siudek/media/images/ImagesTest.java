@@ -5,6 +5,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.collections4.IteratorUtils;
 import org.assertj.core.api.Assertions;
@@ -41,7 +45,10 @@ public class ImagesTest {
     var exampleMediaDir = Path.of("./data");
 
     var actualIter = new Images().find(exampleMediaDir.toFile());
-    var images = IteratorUtils.toList(actualIter);
+    var actualSpliter = Spliterators.spliteratorUnknownSize(actualIter, Spliterator.NONNULL);
+    var images = StreamSupport.stream(actualSpliter, false)
+        .toList();
+    
 
     for (var image: images) {
       var asBase64 = Images.asJpegBase64(image);

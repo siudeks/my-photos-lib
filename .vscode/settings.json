@@ -10,7 +10,6 @@
     "python.analysis.typeCheckingMode": "basic",
     "java.test.config": {
       "vmArgs": [
-        "--enable-native-access=ALL-UNNAMED",
         "-Djava.library.path=/usr/lib/x86_64-linux-gnu/"
       ],
     }

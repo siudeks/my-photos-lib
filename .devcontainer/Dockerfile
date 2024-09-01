@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
 # As we need libheif 1.16+, we need to add additional PPA
 # more: https://ubuntuhandbook.org/index.php/2024/01/install-latest-libheif-ubuntu/
+RUN sudo apt-get update 
 RUN sudo apt-get install software-properties-common -y # install add-apt-repository
 RUN sudo add-apt-repository ppa:strukturag/libheif
 RUN sudo add-apt-repository ppa:strukturag/libde265

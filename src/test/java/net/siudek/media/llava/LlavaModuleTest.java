@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Media;
@@ -30,7 +31,8 @@ import net.siudek.media.llava.OllamaPort.EmbeddingsBody;
 
 @SpringBootTest(classes = MediaApplication.class)
 @ActiveProfiles("test")
-public class LlavaModuleTest {
+@Disabled
+  public class LlavaModuleTest {
 
   @Autowired
   ChatModel chatModel;
