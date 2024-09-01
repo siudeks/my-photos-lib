@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class FileView {
 
   /** Return list of images to satisfy you query. */
-  List<Image> find(String query) {
+  public List<Image> find(String query) {
     return List.of();
   }
 

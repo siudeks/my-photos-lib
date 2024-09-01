@@ -26,10 +26,10 @@ import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import lombok.SneakyThrows;
-import net.siudek.media.host.MediaApplication;
+import net.siudek.media.Program;
 import net.siudek.media.llava.OllamaPort.EmbeddingsBody;
 
-@SpringBootTest(classes = MediaApplication.class)
+@SpringBootTest(classes = Program.class)
 @ActiveProfiles("test")
   public class LlavaModuleTest {
 
