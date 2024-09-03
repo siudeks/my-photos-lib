@@ -3,6 +3,7 @@ package net.siudek.media;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
+import org.springframework.modulith.docs.Documenter;
 
 public class ArchTests {
 
@@ -20,12 +21,12 @@ public class ArchTests {
     modules.verify();
 	}
 
-  // @Test
-  // void writeDocumentationSnippets() {
+  @Test
+  void writeDocumentationSnippets() {
 
-  //   new Documenter(modules)
-  //     .writeModulesAsPlantUml()
-  //     .writeIndividualModulesAsPlantUml();
-  // }
+    new Documenter(modules)
+      .writeModulesAsPlantUml()
+      .writeIndividualModulesAsPlantUml();
+  }
 }
 

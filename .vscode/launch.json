@@ -6,10 +6,10 @@
     "configurations": [
         {
             "type": "java",
-            "name": "MediaApplication",
+            "name": "Program",
             "request": "launch",
-            "mainClass": "net.siudek.media.host.MediaApplication",
-            "projectName": "media",
+            "mainClass": "net.siudek.media.Program",
+            "projectName": "media"
         }
     ]
 }

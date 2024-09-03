@@ -10,6 +10,10 @@ RUN sudo apt-get update
 
 RUN sudo apt install libheif-dev -y # required by python (pyheif) and java (https://github.com/gotson/NightMonkeys/tree/main/imageio-heif)
 
+# require graphviz to run PlantUML vscode plugin
+# more: https://plantuml.com/graphviz-dot
+RUN sudo apt install graphviz -y
+
 # fix loading heic files errors:
 # libXtst.so.6: cannot open shared object file: No such file or directory
 RUN sudo apt-get install libxtst6 -y

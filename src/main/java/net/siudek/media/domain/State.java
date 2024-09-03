@@ -1,15 +1,14 @@
 package net.siudek.media.domain;
 
+import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 
 /** Shared, in-memory state of the processing */
 @Component
-public class State {
+class State {
 
-  private final ConcurrentHashMap<String, StateValue> watchedFiles = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Path, StateValue> watchedFiles = new ConcurrentHashMap<>();
 
-  interface StateValue {
-  }
 }

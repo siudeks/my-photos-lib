@@ -18,6 +18,11 @@ Application needs to have access to libheif, so you have to add extra applicatio
 -Djava.library.path=/usr/lib/x86_64-linux-gnu/
 as application is linked with libheif
 
+### To small fonts in visualVM?
+Add to ~~./bashrc:
+export GDK_SCALE=2
+export GDK_DPI_SCALE=0.75
+
 ## run UI for Ollama:
 sudo docker run -d -p 3000:8080 \
     -v open-webui:/app/backend/data \

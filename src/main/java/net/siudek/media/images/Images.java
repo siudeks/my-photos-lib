@@ -16,19 +16,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.imageio.ImageIO;
 
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.siudek.media.domain.Image;
+import net.siudek.media.domain.MediaSearch;
 import net.siudek.media.utils.FileUtils;
 
 /**
  * Finds and observes lifecycle of all images in requested folder(s). For each image identifies its state and applies next steps of image recognition.
  */
-public class Images {
+@Component
+@RequiredArgsConstructor
+class Images implements MediaSearch {
 
-  @SneakyThrows
+  @Override
   public Iterator<Image> find(File root) {
     var items = new LinkedBlockingQueue<Path>();
     var visitor = new Visitor(items);
@@ -36,7 +40,7 @@ public class Images {
     return items.stream().map(Images::asImage).iterator();
   }
 
-  @SneakyThrows
+  @SneakyThrows(IOException.class)
   public static Image asImage(Path image) {
     var ext = FileUtils.asFilename(image, it -> it.ext());
     var extension = Files.probeContentType(image);
