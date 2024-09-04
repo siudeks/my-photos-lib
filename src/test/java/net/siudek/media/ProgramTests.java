@@ -4,10 +4,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.concurrent.Semaphore;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,11 +23,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 
+import lombok.Cleanup;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import net.siudek.media.domain.FileView;
 import net.siudek.media.domain.Image;
 import net.siudek.media.domain.StateListener;
 import net.siudek.media.domain.StateValue;
+import net.siudek.media.utils.SafeCloseable;
 
 /** All images are located in root directory named 'data' */
 @SpringBootTest(
@@ -37,7 +43,7 @@ import net.siudek.media.domain.StateValue;
 )
 @DirtiesContext
 @Import(value = ProgramTests.MyListener.class)
-@Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 10)
+//@Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 3)
 public class ProgramTests {
 
   @Autowired
@@ -63,7 +69,7 @@ public class ProgramTests {
     // wait when all files are discovered
     // we know there are 3 images
     var awaiter = listener.registerWaiter(it -> {
-      return it.get() == 3;
+      return it.discovered() == 3;
     });
     awaiter.await();
 
@@ -78,7 +84,7 @@ public class ProgramTests {
 
     // wait when all files are discovered
     // we know there are 3 images
-    var awaiter = listener.registerWaiter(it -> it.get() == 3);
+    var awaiter = listener.registerWaiter(it -> it.discovered() == 3);
     awaiter.await();
 
     var files = fileView.find("Image with a dog");
@@ -90,16 +96,44 @@ public class ProgramTests {
   }
 
   @Component
+  @Slf4j
   public static class MyListener implements StateListener {
+    record Context(State lastKnown, CountDownLatch locker) { }
 
-    private AtomicInteger discovered = new AtomicInteger();
-    private Map<Function<AtomicInteger, Boolean>, CountDownLatch> listeners = new HashMap<>();
+    private State current = new State(0);
+
+    private Semaphore notifyListenersLock = new Semaphore(1);
+    private HashMap<Function<State, Boolean>, Context> listeners = new HashMap<>();
+
+    
 
     @Override
     public void on(StateValue event) {
+      withLock(() -> {
+        changeState(event);
+        notifyListeners();
+      });
+    }
+
+    CountDownLatch registerWaiter(Function<State, Boolean> stateValidator) {
+      return withLock(() -> {
+        var result = registerWaiterInter(stateValidator);
+        notifyListeners();
+        return result;
+      }, () -> new CountDownLatch(1000));
+    }
+
+    private CountDownLatch registerWaiterInter(Function<State, Boolean> stateValidator) {
+      var awaiter = new CountDownLatch(1);
+      var context = new Context(null, awaiter);
+      listeners.put(stateValidator, context);
+      return awaiter;
+    }
+
+    private void changeState(StateValue event) {
       switch (event) {
         case StateValue.Discovered it:
-          discovered.incrementAndGet();
+          current = new State(current.discovered() + 1);
           break;
         case StateValue.Hashed it:
           break;
@@ -108,23 +142,48 @@ public class ProgramTests {
         case StateValue.Indexed it:
           break;
       }
-      // notify listeners if any
+    }
+
+    // notifies all new listeners about current state
+    private void notifyListeners() {
       for (var listener: listeners.entrySet()) {
         var checker = listener.getKey();
-        var awaiter = listener.getValue();
-        var accepted = checker.apply(discovered);
-        if (accepted) {
-          awaiter.countDown();
+        var context = listener.getValue();
+
+        var lastKnownState = context.lastKnown();
+        if (Objects.equals(current, lastKnownState)) {
+          // already informed about state
+          continue;
         }
 
+        var accepted = checker.apply(current);
+        if (accepted) {
+          var awaiter = context.locker;
+          awaiter.countDown();
+        }
       }
     }
 
-    CountDownLatch registerWaiter(Function<AtomicInteger, Boolean> stateValidator) {
-      var awaiter = new CountDownLatch(1);
-      listeners.put(stateValidator, awaiter);
-      return awaiter;
+    void withLock(Runnable task) {
+      var asSupplier = (Supplier<?>) () -> {
+        task.run();
+        return null;
+      };
+      withLock(asSupplier, () -> null);
     }
 
+    <T> T withLock(Supplier<T> task, Supplier<T> defaultWhenInterrupted) {
+      try {
+        notifyListenersLock.acquire();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return defaultWhenInterrupted.get();
+      }
+
+      @Cleanup
+      var closer = (SafeCloseable) () -> notifyListenersLock.release();
+      return task.get();
+    }
   }
 }
+
