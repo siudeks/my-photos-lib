@@ -6,6 +6,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.springframework.context.SmartLifecycle;
@@ -13,10 +15,12 @@ import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.siudek.media.utils.CloseableQueue;
 
 /** The processor is responsible to handle all file-events and processing each file   */
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class FileEventProcessor implements Runnable, SmartLifecycle {
   
@@ -26,7 +30,7 @@ public class FileEventProcessor implements Runnable, SmartLifecycle {
 
   // Path - identitiy of collecting events
   // PriorityBlockingQueue - with prioretization to allow inform early about change / delete so that some waiting operations can be cancelled
-  private final ConcurrentHashMap<Path, ArrayBlockingQueue<FileProcessingState>> actors = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Path, LinkedBlockingQueue<FileProcessingState>> actors = new ConcurrentHashMap<>();
 
   @Override
   public void run() {
@@ -36,16 +40,20 @@ public class FileEventProcessor implements Runnable, SmartLifecycle {
         switch (event) {
           case FileEvent.Found it: {
             var actor = it.path();
-            actors.compute(actor, (Path key, ArrayBlockingQueue<FileProcessingState> b) -> {
+            actors.compute(actor, (Path key, LinkedBlockingQueue<FileProcessingState> b) -> {
               if (b != null) {
                 throw new IllegalStateException("Found already processed file.");
               }
-              var messages = new ArrayBlockingQueue<FileProcessingState>(100);
+              try {
+              var messages = new LinkedBlockingQueue<FileProcessingState>();
               var initialMessage = new FileProcessingState.Discovered(key);
               messages.offer(initialMessage);
               var actor1 = new Actor(key, messages, stateListeners);
               executorService.submit(actor1);
               return messages;
+              } catch (Exception ex) {
+                throw ex;
+              }
             });
             break;
           }
