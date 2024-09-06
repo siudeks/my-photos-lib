@@ -17,6 +17,7 @@
     <spring-ai.version>1.0.0.M2</spring-ai.version>
     <spring-modulith.version>1.2.3</spring-modulith.version>
     <gotson-nightmonkeys.version>1.0.0</gotson-nightmonkeys.version>
+    <jsr305.version>3.0.2</jsr305.version>
   </properties>
 
   <dependencies>
@@ -38,6 +39,11 @@
         <version>3.6.1</version>
     </dependency>
 
+    <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${jsr305.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.commons</groupId>

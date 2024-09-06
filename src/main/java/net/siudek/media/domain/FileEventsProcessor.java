@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,13 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FileEventsProcessor implements AutoCloseable {
+public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
   private final MediaSearch images;
   private final FileEvents fileEvents;
-  private final List<StateListener> stateListeners;
 
+  /* Starting point as we have initial applicatio nargs to start the flow. */
   @EventListener
   @Async
   public void on(Events.RunArgs args) {
@@ -35,9 +36,11 @@ public class FileEventsProcessor implements AutoCloseable {
       while(iterables.hasNext()) {
         var file = iterables.next();
         var filePath = file.path();
-        fileEvents.add(new FileEvent.Found(filePath));
-        for (var listener: stateListeners) {
-          listener.on(new StateValue.Discovered(filePath));
+        try {
+          fileEvents.put(new FileEvent.Found(filePath));
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          break;
         }
       }
     };
@@ -47,6 +50,22 @@ public class FileEventsProcessor implements AutoCloseable {
   @Override
   public void close() throws Exception {
     vExecutor.close();
+  }
+
+  @Override
+  public void start() {
+    isRunning = true;
+  }
+
+  @Override
+  public void stop() {
+    isRunning = false;
+  }
+
+  private boolean isRunning = false;
+  @Override
+  public boolean isRunning() {
+    return isRunning;
   }
   
 }

@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public sealed interface FileEvent {
   
-  /** Media file found. */
+  /** Media file found - already existing or just created. */
   record Found(Path path) implements FileEvent {
   }
 

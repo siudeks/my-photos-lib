@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.siudek.media.domain.FileView;
 import net.siudek.media.domain.Image;
 import net.siudek.media.domain.StateListener;
-import net.siudek.media.domain.StateValue;
+import net.siudek.media.domain.FileProcessingState;
 import net.siudek.media.utils.SafeCloseable;
 
 /** All images are located in root directory named 'data' */
@@ -43,7 +43,7 @@ import net.siudek.media.utils.SafeCloseable;
 )
 @DirtiesContext
 @Import(value = ProgramTests.MyListener.class)
-//@Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 3)
+@Timeout(threadMode = ThreadMode.SAME_THREAD, unit = TimeUnit.SECONDS, value = 10)
 public class ProgramTests {
 
   @Autowired
@@ -108,7 +108,7 @@ public class ProgramTests {
     
 
     @Override
-    public void on(StateValue event) {
+    public void on(FileProcessingState event) {
       withLock(() -> {
         changeState(event);
         notifyListeners();
@@ -130,16 +130,16 @@ public class ProgramTests {
       return awaiter;
     }
 
-    private void changeState(StateValue event) {
+    private void changeState(FileProcessingState event) {
       switch (event) {
-        case StateValue.Discovered it:
+        case FileProcessingState.Discovered it:
           current = new State(current.discovered() + 1);
           break;
-        case StateValue.Hashed it:
+        case FileProcessingState.Hashed it:
           break;
-        case StateValue.Described it:
+        case FileProcessingState.Described it:
           break;
-        case StateValue.Indexed it:
+        case FileProcessingState.Indexed it:
           break;
       }
     }

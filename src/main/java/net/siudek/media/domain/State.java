@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 class State {
 
-  private final ConcurrentHashMap<Path, StateValue> watchedFiles = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Path, FileProcessingState> watchedFiles = new ConcurrentHashMap<>();
 
 }

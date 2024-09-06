@@ -1,0 +1,115 @@
+package net.siudek.media.utils;
+
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.Semaphore;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import lombok.Cleanup;
+import lombok.extern.slf4j.Slf4j;
+import net.siudek.media.domain.StateListener;
+import net.siudek.media.domain.StateValue;
+
+/**
+ * E - type of handled event S - internal state based on events U - type
+ * returned for registered listener, e.g. waiter of listening releaser.
+ */
+@Slf4j
+public abstract class EventHandler<E, S, T> {
+
+  record Context<S>(S lastKnown) {
+  }
+
+  // state is updated with every incoming message
+  // - each new listener is updated immediately with current state
+  // when state changed, each already register listener is informed
+  private final S currentState;
+
+  private Semaphore lock = new Semaphore(1);
+  private HashMap<Consumer<S, Context> listeners = new HashMap<>();
+
+  protected EventHandler(Supplier<S> zeroStateFactory) {
+    this.currentState = zeroStateFactory.get();
+  }
+
+  protected abstract S computeState(S current, E event);
+  protected abstract T registerListener(Consumer<S> listener);
+
+  public void on(E event) {
+    withLock(() -> {
+      currentState = computeState(currentState, event);
+      notifyListeners();
+    });
+  }
+
+  public T newListener(Consumer<S> listener) {
+    return withLock(() -> {
+      var result = registerListener(listener);
+      notifyListeners();
+      return result;
+    }, () -> new CountDownLatch(1000));
+  }
+
+  // private CountDownLatch registerWaiterInter(Function<State, Boolean>
+  // stateValidator) {
+  // var awaiter = new CountDownLatch(1);
+  // var context = new Context(null, awaiter);
+  // listeners.put(stateValidator, context);
+  // return awaiter;
+  // }
+
+  // private void changeState(StateValue event) {
+  // switch (event) {
+  // case StateValue.Discovered it:
+  // current = new State(current.discovered() + 1);
+  // break;
+  // case StateValue.Hashed it:
+  // break;
+  // case StateValue.Described it:
+  // break;
+  // case StateValue.Indexed it:
+  // break;
+  // }
+  // }
+
+  // notifies all new listeners about current state
+  private void notifyListeners() {
+    for (var listener : listeners.entrySet()) {
+      var checker = listener.getKey();
+      var context = listener.getValue();
+
+      var lastKnownState = context.lastKnown();
+      if (Objects.equals(current, lastKnownState)) {
+        // already informed about state
+        continue;
+      }
+
+      var accepted = checker.apply(current);
+      if (accepted) {
+        var awaiter = context.locker;
+        awaiter.countDown();
+      }
+    }
+  }
+
+  void withLock(Runnable task) {
+    var asSupplier = (Supplier<?>) () -> {
+      task.run();
+      return null;
+    };
+    withLock(asSupplier, () -> null);
+  }
+
+  <T> T withLock(Supplier<T> task, Supplier<T> defaultWhenInterrupted) {
+    try {
+      lock.acquire();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return defaultWhenInterrupted.get();
+    }
+
+    @Cleanup
+    var closer = (SafeCloseable) () -> lock.release();
+    return task.get();
+  }
+}

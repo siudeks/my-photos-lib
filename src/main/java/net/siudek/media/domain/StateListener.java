@@ -4,6 +4,6 @@ public interface StateListener {
   
   record State(int discovered) { }
 
-  void on(StateValue event);
+  void on(FileProcessingState event);
   
 }
