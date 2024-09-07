@@ -5,10 +5,11 @@ import java.util.concurrent.BlockingQueue;
 
 import lombok.RequiredArgsConstructor;
 
+/** Blocking actor, using provided queueas source of messages. */
 @RequiredArgsConstructor
 class FileActor implements Runnable {
   private final Path self;
-  private final BlockingQueue<FileProcessingState> messages;
+  private final BlockingQueue<Command> messages;
   private final StateListeners stateListeners;
 
   @Override
@@ -17,17 +18,9 @@ class FileActor implements Runnable {
       try {
         var message = messages.take();
         switch (message) {
-          case FileProcessingState.Discovered it: {
-            stateListeners.on(it);
-            break;
-          }
-          case FileProcessingState.Hashed it: {
-            break;
-          }
-          case FileProcessingState.Described it: {
-            break;
-          }
-          case FileProcessingState.Indexed it: {
+          case Command.Process it: {
+            var evt = new FileProcessingState.Discovered(self);
+            stateListeners.on(evt);
             break;
           }
         }
@@ -36,5 +29,9 @@ class FileActor implements Runnable {
         break;
       }
     }
+  }
+
+  sealed interface Command {
+    record Process() implements Command { }
   }
 }

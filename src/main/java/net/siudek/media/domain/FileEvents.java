@@ -1,9 +1,5 @@
 package net.siudek.media.domain;
 
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.springframework.stereotype.Component;

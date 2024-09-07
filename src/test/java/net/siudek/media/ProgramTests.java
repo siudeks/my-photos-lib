@@ -3,14 +3,12 @@ package net.siudek.media;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.concurrent.Semaphore;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,10 +24,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.siudek.media.domain.FileProcessingState;
 import net.siudek.media.domain.FileView;
 import net.siudek.media.domain.Image;
 import net.siudek.media.domain.StateListener;
-import net.siudek.media.domain.FileProcessingState;
 import net.siudek.media.utils.SafeCloseable;
 
 /** All images are located in root directory named 'data' */

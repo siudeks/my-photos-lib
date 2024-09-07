@@ -1,7 +1,6 @@
 package net.siudek.media.domain;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
