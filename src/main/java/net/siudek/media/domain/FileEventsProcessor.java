@@ -24,7 +24,7 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
   /* Starting point as we have initial applicatio nargs to start the flow. */
   @EventListener
   @Async
-  public void on(Events.RunArgs args) {
+  public void on(AppEvent.RunArgs args) {
     var dirSearch = asRunnable(args.root());
     vExecutor.execute(dirSearch);
   }

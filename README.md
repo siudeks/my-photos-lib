@@ -30,7 +30,7 @@ sudo docker run -d -p 3000:8080 \
     ghcr.io/open-webui/open-webui:main
 
 ## Inspirations:
-- [I built an image search engine (Toutube)](https://www.youtube.com/watch?v=mBcBoGhFndY)
+- [I built an image search engine (Youtube)](https://www.youtube.com/watch?v=mBcBoGhFndY)
 
 ## Links
 - [gotson nightmonkeys](https://github.com/gotson/NightMonkeys) to read jpg, png and heic images (java 22 required - see docs)

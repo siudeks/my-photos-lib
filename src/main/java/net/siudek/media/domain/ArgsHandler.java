@@ -10,6 +10,7 @@ import org.springframework.util.Assert;
 
 import lombok.RequiredArgsConstructor;
 
+/** When app started, handles run arg and converts it to {@see AppEvent} */
 @Component
 @RequiredArgsConstructor
 class ArgsHandler implements ApplicationRunner {
@@ -21,6 +22,6 @@ class ArgsHandler implements ApplicationRunner {
     var rootDirName = args.getOptionValues("dir").get(0);
     var asPath = Path.of(rootDirName);
     Assert.isTrue(asPath.toFile().exists(), "Root path exists");
-    publisher.publishEvent(new Events.RunArgs(asPath));
+    publisher.publishEvent(new AppEvent.RunArgs(asPath));
   }
 }

@@ -183,5 +183,12 @@ public class ProgramTests {
       return task.get();
     }
   }
+
+  @Test
+  public void readEvents() {
+    try (var stream = new jdk.jfr.consumer.RecordingStream()) {
+      // do some magic here for demo purpose, with extending Assertions
+    }
+  }
 }
 

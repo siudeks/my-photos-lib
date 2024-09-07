@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class FileEventProcessor implements Runnable, SmartLifecycle {
+public class FileActorFactory implements Runnable, SmartLifecycle {
 
   private final FileEvents fileEvents;
   private final StateListeners stateListeners;
