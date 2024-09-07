@@ -2,6 +2,7 @@ package net.siudek.media.domain;
 
 import java.nio.file.Path;
 
+/** List of all events related to single files, which can be generated from observed folder. */
 public sealed interface FileEvent {
   
   /** Media file found - already existing or just created. */

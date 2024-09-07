@@ -48,7 +48,7 @@ public class FileEventProcessor implements Runnable, SmartLifecycle {
               var messages = new LinkedBlockingQueue<FileProcessingState>();
               var initialMessage = new FileProcessingState.Discovered(key);
               messages.offer(initialMessage);
-              var actor1 = new Actor(key, messages, stateListeners);
+              var actor1 = new FileActor(key, messages, stateListeners);
               executorService.submit(actor1);
               return messages;
               } catch (Exception ex) {
@@ -86,40 +86,6 @@ public class FileEventProcessor implements Runnable, SmartLifecycle {
   @Override
   public boolean isRunning() {
     return isRunning;
-  }
-
-  @RequiredArgsConstructor
-  static class Actor implements Runnable {
-    private final Path self;
-    private final BlockingQueue<FileProcessingState> messages;
-    private final StateListeners stateListeners;
-
-    @Override
-    public void run() {
-      while(true) {
-        try {
-          var message = messages.take();
-          switch (message) {
-            case FileProcessingState.Discovered it: {
-              stateListeners.on(it);
-              break;
-            }
-            case FileProcessingState.Hashed it: {
-              break;
-            }
-            case FileProcessingState.Described it: {
-              break;
-            }
-            case FileProcessingState.Indexed it: {
-              break;
-            }
-          }
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          break;
-        }
-      }
-    }
   }
 
 }
