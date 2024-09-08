@@ -34,12 +34,18 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
       var iterables = images.find(root.toFile());
       while(iterables.hasNext()) {
         var file = iterables.next();
-        var filePath = file.path();
-        try {
-          fileEvents.put(new FileEvent.Found(filePath));
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          break;
+        switch (file) {
+          case MediaFile.Sha256 _: {
+            continue;
+          }
+          case Image it: {
+            try {
+              fileEvents.put(new FileEvent.Found(it.path()));
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+              break;
+            }
+              }
         }
       }
     };

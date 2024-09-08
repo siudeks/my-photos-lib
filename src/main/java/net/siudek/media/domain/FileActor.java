@@ -1,14 +1,15 @@
 package net.siudek.media.domain;
 
+import static com.google.common.io.Files.asByteSource;
+
 import java.nio.file.Path;
-import java.util.Optional;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.BlockingQueue;
 
-import org.springframework.util.Assert;
-
+import com.google.common.base.Objects;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
-import com.google.common.io.Files;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,12 +37,12 @@ class FileActor implements Runnable {
 
   private void handle(Command cmd) {
     switch (cmd) {
-      case Command.Process it: {
-        var evt = new FileProcessingState.Discovered(self);
-        stateListeners.on(evt);
-        createChecksumFile(self);
-        break;
-      }
+    case Command.Process it: {
+      var evt = new FileProcessingState.Discovered(self);
+      stateListeners.on(evt);
+      createChecksumFile(self);
+      break;
+    }
     }
   }
 
@@ -50,25 +51,34 @@ class FileActor implements Runnable {
     var mediaFileName = media.toFile().getName();
     var checksumFile = media.resolveSibling(mediaFileName + ".sha256");
 
-    var hash = switch (Try.of(() -> Files.asByteSource(mediaFile).hash(Hashing.sha256()))) {
-      case Try.Value<HashCode>(HashCode value) -> {
-        yield value.toString();
-      }
-      case Try.Error it -> {
-        log.error("sha256 calc error", it.ex());
-        yield null;
-      }
+    var hash = switch (Try.of(() -> asByteSource(mediaFile).hash(Hashing.sha256()))) {
+    case Try.Value<HashCode>(HashCode value) -> {
+      yield value.toString();
+    }
+    case Try.Error(var ex) -> {
+      log.error("sha256 calc error", ex);
+      yield null;
+    }
     };
 
-    if (hash == null) return;
+    if (hash == null)
+      return;
 
-    switch (Try.of(() -> java.nio.file.Files.writeString(checksumFile, hash))) {
+    // read already created hash file, if exists
+    var skipChecksum = Files.exists(checksumFile) && switch (Try.of(() -> Files.readAllBytes(checksumFile))) {
+    case Try.Value<byte[]>(byte[] value) -> Objects.equal(new String(value), hash);
+    case Try.Error(var ex) -> false;
+    };
+
+    if (!skipChecksum) {
+      switch (Try.of(() -> Files.writeString(checksumFile, hash, StandardOpenOption.CREATE))) {
       case Try.Value<Path>(Path value): {
         // success
         break;
       }
-      case Try.Error it: {
-        log.error("sha256 store error", it.ex());
+      case Try.Error(var ex): {
+        log.error("sha256 store error", ex);
+      }
       }
     }
 

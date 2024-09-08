@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.siudek.media.domain.Image;
+import net.siudek.media.domain.MediaFile;
 import net.siudek.media.domain.MediaSearch;
 import net.siudek.media.utils.FileUtils;
 
@@ -33,22 +34,21 @@ import net.siudek.media.utils.FileUtils;
 class Images implements MediaSearch {
 
   @Override
-  public Iterator<Image> find(File root) {
+  public Iterator<MediaFile> find(File root) {
     var items = new LinkedBlockingQueue<Path>();
     var visitor = new Visitor(items);
     run(root, visitor);
-    return items.stream().map(Images::asImage).iterator();
+    return items.stream().map(Images::asMediaFile).iterator();
   }
 
-  @SneakyThrows(IOException.class)
-  public static Image asImage(Path image) {
+  public static MediaFile asMediaFile(Path image) {
     var ext = FileUtils.asFilename(image, it -> it.ext());
-    var extension = Files.probeContentType(image);
     return switch (ext) {
       case "jpg" -> new Image.JPG(image);
       case "png" -> new Image.PNG(image);
       case "heic" -> new Image.HEIC(image);
-      default -> throw new IllegalArgumentException("extension [" + extension + "] is not supported.");
+      case "sha256" -> new MediaFile.Sha256(image);
+      default -> throw new IllegalArgumentException("File extension [" + ext + "] is not supported.");
     };
   }
 

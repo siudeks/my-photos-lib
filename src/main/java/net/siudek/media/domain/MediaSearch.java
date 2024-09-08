@@ -5,6 +5,6 @@ import java.util.Iterator;
 
 public interface MediaSearch {
 
-  public Iterator<Image> find(File root);
+  public Iterator<MediaFile> find(File root);
 
 }

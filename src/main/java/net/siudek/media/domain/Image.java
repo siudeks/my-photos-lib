@@ -2,7 +2,7 @@ package net.siudek.media.domain;
 
 import java.nio.file.Path;
 
-public sealed interface Image {
+public sealed interface Image extends MediaFile {
 
   Path path();
 
