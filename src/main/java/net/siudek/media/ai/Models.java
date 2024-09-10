@@ -1,4 +1,4 @@
-package net.siudek.media.llava;
+package net.siudek.media.ai;
 
 import lombok.Getter;
 
@@ -37,7 +37,7 @@ public enum Models {
 
     // Checks if requested model is already available for usage.
     // Used to fix the issue when we try to use a model, and it is downloded instead of being used immediately
-    static void assureModelsAvailable(OllamaPort.ListResult listResult) {
+    public static void assureModelsAvailable(OllamaPort.ListResult listResult) {
         var availableModels = listResult.models().stream()
                 .map(it -> it.name())
                 .toList();

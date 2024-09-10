@@ -5,3 +5,5 @@ media.log
 app.jfr
 
 target/
+
+*.sha256

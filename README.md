@@ -33,9 +33,12 @@ sudo docker run -d -p 3000:8080 \
 - [I built an image search engine (Youtube)](https://www.youtube.com/watch?v=mBcBoGhFndY)
 
 ## Links
-- [gotson nightmonkeys](https://github.com/gotson/NightMonkeys) to read jpg, png and heic images (java 22 required - see docs)
+- [to read jpg, png and heic images (java 22 required - see docs)](https://github.com/gotson/NightMonkeys)
 - https://www.youtube.com/watch?v=JTgl5GwrMu8
 - https://docs.spring.io/spring-ai/reference/api/clients/ollama-chat.html
 - [Improve ollama performance](https://github.com/ollama/ollama/issues/2742)
 - https://medium.com/@gabrielrodewald/running-models-with-ollama-step-by-step-60b6f6125807
+
+Alternative boot:
+https://github.com/Bindambc/whatsapp-business-java-api?tab=readme-ov-file#eyes-overview
 

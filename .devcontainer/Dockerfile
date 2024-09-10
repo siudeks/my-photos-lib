@@ -8,7 +8,12 @@ RUN sudo add-apt-repository ppa:strukturag/libheif
 RUN sudo add-apt-repository ppa:strukturag/libde265
 RUN sudo apt-get update 
 
-RUN sudo apt install libheif-dev -y # required by python (pyheif) and java (https://github.com/gotson/NightMonkeys/tree/main/imageio-heif)
+# required by python (pyheif) and java (https://github.com/gotson/NightMonkeys/tree/main/imageio-heif)
+RUN sudo apt install libheif-dev -y
+
+# it installs heif-convert - CLI tool to convert heic -> jpg, used atm to create local copy of HEIC file
+# more: https://linuxnightly.com/convert-heif-images-to-jpg-or-png-on-linux/
+RUN sudo apt install libheif-examples -y
 
 # require graphviz to run PlantUML vscode plugin
 # more: https://plantuml.com/graphviz-dot

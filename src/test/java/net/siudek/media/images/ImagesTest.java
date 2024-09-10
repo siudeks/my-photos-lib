@@ -18,6 +18,7 @@ import com.tngtech.archunit.thirdparty.com.google.common.io.Files;
 
 import lombok.SneakyThrows;
 import net.siudek.media.domain.Image;
+import net.siudek.media.domain.ImageUtils;
 import net.siudek.media.domain.MediaFile;
 
 public class ImagesTest {
@@ -57,7 +58,7 @@ public class ImagesTest {
         }
         case Image it: {
           @SuppressWarnings("unused")
-          var asBase64 = Images.asJpegBase64(it);
+          var asBase64 = ImageUtils.asJpegBase64(it);
         }
       }
     }
@@ -99,7 +100,7 @@ public class ImagesTest {
         case DirOrFile.Image it: {
           var asPath = Paths.get(curDir.getAbsolutePath(), it.name());
           Files.touch(asPath.toFile());
-          var asImage = Images.asMediaFile(asPath);
+          var asImage = ImageUtils.asMediaFile(asPath);
           switch (asImage) {
             case MediaFile.Sha256 _: {
               break;

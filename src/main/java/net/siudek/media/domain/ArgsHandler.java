@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 /** When app started, handles run arg and converts it to {@see AppEvent} */
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 class ArgsHandler implements ApplicationRunner {
 

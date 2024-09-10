@@ -40,7 +40,7 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
           }
           case Image it: {
             try {
-              fileEvents.put(new FileEvent.Found(it.path()));
+              fileEvents.put(new FileEvent.Found(it));
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();
               break;

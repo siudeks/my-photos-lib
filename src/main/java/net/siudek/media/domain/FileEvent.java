@@ -6,7 +6,7 @@ import java.nio.file.Path;
 public sealed interface FileEvent {
   
   /** Media file found - already existing or just created. */
-  record Found(Path path) implements FileEvent {
+  record Found(Image path) implements FileEvent {
   }
 
   /** Some changed on the file to process. */

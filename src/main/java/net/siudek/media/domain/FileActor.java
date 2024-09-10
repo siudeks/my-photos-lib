@@ -18,9 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 class FileActor implements Runnable {
-  private final Path self;
+  private final Image self;
   private final BlockingQueue<Command> messages;
   private final StateListeners stateListeners;
+  private final ImageDescService imageDescService;
 
   @Override
   public void run() {
@@ -37,13 +38,39 @@ class FileActor implements Runnable {
 
   private void handle(Command cmd) {
     switch (cmd) {
-    case Command.Process it: {
-      var evt = new FileProcessingState.Discovered(self);
-      stateListeners.on(evt);
-      createChecksumFile(self);
-      break;
+      case Command.Process it: {
+
+        {
+          createChecksumFile(self.path());
+          var evt2 = new FileProcessingState.Hashed(self.path());
+          stateListeners.on(evt2);
+        }
+
+        {
+          requestImageDesc(self);
+        }
+
+        break;
+      }
+
+      case Command.ApplyDescription(var description): {
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info(description);
+        log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        var evt1 = new FileProcessingState.Discovered(self.path());
+        stateListeners.on(evt1);
+      }
     }
-    }
+  }
+
+  private void handleResponse(String imageDesc) {
+    var msg = new Command.ApplyDescription(imageDesc);
+    messages.offer(msg); // TODO handle failure
+  }
+
+  private void requestImageDesc(Image mediaFile) {
+    var jpgBase64 = ImageUtils.asJpegBase64(mediaFile);
+    imageDescService.request(jpgBase64, this::handleResponse);
   }
 
   void createChecksumFile(Path media) {
@@ -52,13 +79,13 @@ class FileActor implements Runnable {
     var checksumFile = media.resolveSibling(mediaFileName + ".sha256");
 
     var hash = switch (Try.of(() -> asByteSource(mediaFile).hash(Hashing.sha256()))) {
-    case Try.Value<HashCode>(HashCode value) -> {
-      yield value.toString();
-    }
-    case Try.Error(var ex) -> {
-      log.error("sha256 calc error", ex);
-      yield null;
-    }
+      case Try.Value<HashCode>(HashCode value) -> {
+        yield value.toString();
+      }
+      case Try.Error(var ex) -> {
+        log.error("sha256 calc error", ex);
+        yield null;
+      }
     };
 
     if (hash == null)
@@ -85,7 +112,12 @@ class FileActor implements Runnable {
   }
 
   sealed interface Command {
+
     record Process() implements Command {
+    }
+
+    record ApplyDescription(String description) implements Command {
+
     }
   }
 }

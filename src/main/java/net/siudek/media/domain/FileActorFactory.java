@@ -1,6 +1,5 @@
 package net.siudek.media.domain;
 
-import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,11 +23,12 @@ public class FileActorFactory implements Runnable, SmartLifecycle {
   private final FileEvents fileEvents;
   private final StateListeners stateListeners;
   private ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+  private final ImageDescService imageDescService;
 
   // Path - identitiy of collecting events
   // PriorityBlockingQueue - with prioretization to allow inform early about
   // change / delete so that some waiting operations can be cancelled
-  private final ConcurrentHashMap<Path, LinkedBlockingQueue<FileActor.Command>> actors = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Image, LinkedBlockingQueue<FileActor.Command>> actors = new ConcurrentHashMap<>();
 
   @Override
   public void run() {
@@ -37,8 +37,8 @@ public class FileActorFactory implements Runnable, SmartLifecycle {
         var event = fileEvents.take();
         switch (event) {
         case FileEvent.Found it: {
-          var actor = it.path();
-          actors.compute(actor, (Path key, LinkedBlockingQueue<FileActor.Command> b) -> {
+          var actorId = it.path();
+          actors.compute(actorId, (Image key, LinkedBlockingQueue<FileActor.Command> b) -> {
             if (b != null) {
               throw new IllegalStateException("Found already processed file.");
             }
@@ -47,7 +47,7 @@ public class FileActorFactory implements Runnable, SmartLifecycle {
               var messages = new LinkedBlockingQueue<FileActor.Command>();
               var initialMessage = new FileActor.Command.Process();
               messages.offer(initialMessage);
-              var actor1 = new FileActor(key, messages, stateListeners);
+              var actor1 = new FileActor(key, messages, stateListeners, imageDescService);
               executorService.submit(actor1);
               return messages;
             } catch (Exception ex) {

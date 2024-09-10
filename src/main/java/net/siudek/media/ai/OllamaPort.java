@@ -1,4 +1,4 @@
-package net.siudek.media.llava;
+package net.siudek.media.ai;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Equivalent of https://github.com/ollama/ollama/blob/main/docs/api.md
@@ -49,14 +45,4 @@ public interface OllamaPort {
   record Model(String name, OffsetDateTime modifiedAt, long size, String digest) {
   }
 
-}
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class GenerateBody {
-  String model;
-  String prompt;
-  boolean stream;
-  String[] images;
 }

@@ -1,5 +1,6 @@
 package net.siudek.media.llava;
 
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
@@ -26,11 +27,19 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import lombok.SneakyThrows;
 import net.siudek.media.Program;
-import net.siudek.media.llava.OllamaPort.EmbeddingsBody;
+import net.siudek.media.ai.GenerateBody;
+import net.siudek.media.ai.Models;
+import net.siudek.media.ai.OllamaPort;
+import net.siudek.media.ai.OllamaPort.EmbeddingsBody;
+import net.siudek.media.domain.Image;
+import net.siudek.media.domain.ImageUtils;
+import net.siudek.media.domain.MediaFile;
 
-@SpringBootTest(classes = Program.class)
+@SpringBootTest(  
+  classes = Program.class
+)
 @ActiveProfiles("test")
-  public class LlavaModuleTest {
+public class LlavaModuleTest {
 
   @Autowired
   ChatModel chatModel;
@@ -54,10 +63,19 @@ import net.siudek.media.llava.OllamaPort.EmbeddingsBody;
 
     Models.assureModelsAvailable(ollamaService.list());
 
-    byte[] data = new ClassPathResource("llava/example1.jpg").getContentAsByteArray();
-    String imageStr = Base64.getEncoder().encodeToString(data);
+    // var mediaFile = "./data/cat.png";
+    var mediaFile = "./data/dog.heic";
+
+    var mediaPath = Path.of(mediaFile);
+    Assertions.assertThat(mediaPath).exists();
+    var asImage = switch(ImageUtils.asMediaFile(mediaPath)) {
+      case Image it -> it;
+      default -> throw new IllegalArgumentException();
+    };
+
+    var jpgBase64 = ImageUtils.asJpegBase64(asImage);
     var llavaModelName = Models.Llava_v16_p7b.getNameAndTag();
-    var response = ollamaService.generate(new GenerateBody(llavaModelName, "Describe the photo.", false, new String[] { imageStr }));
+    var response = ollamaService.generate(new GenerateBody(llavaModelName, "Describe the photo.", false, new String[] { jpgBase64 }));
     var responseText = response.response();
 
     var embeddingsModelName = Models.Llama_v31_p8b.getModelName();
