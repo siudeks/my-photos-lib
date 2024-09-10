@@ -93,13 +93,13 @@ class FileActor implements Runnable {
 
     // read already created hash file, if exists
     var skipChecksum = Files.exists(checksumFile) && switch (Try.of(() -> Files.readAllBytes(checksumFile))) {
-    case Try.Value<byte[]>(byte[] value) -> Objects.equal(new String(value), hash);
+    case Try.Value<byte[]>(var value) -> Objects.equal(new String(value), hash);
     case Try.Error(var ex) -> false;
     };
 
     if (!skipChecksum) {
       switch (Try.of(() -> Files.writeString(checksumFile, hash, StandardOpenOption.CREATE))) {
-      case Try.Value<Path>(Path value): {
+      case Try.Value<Path>(var value): {
         // success
         break;
       }

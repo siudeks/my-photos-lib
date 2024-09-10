@@ -45,7 +45,7 @@ public class ImageUtils {
   public static String asJpegBase64(Image.HEIC image) {
     var tempFile = Files.createTempFile("heic-", ".jpg");
     @Cleanup
-    AutoCloseable delTempFile = () -> tempFile.toFile().delete();
+    AutoCloseable delTempFile = () -> Files.delete(tempFile);
     var process = new ProcessBuilder()
       .command("heif-convert", image.path().toFile().getAbsolutePath(), tempFile.toFile().getAbsolutePath())
       .start();
