@@ -9,7 +9,8 @@
             "name": "Program",
             "request": "launch",
             "mainClass": "net.siudek.media.Program",
-            "projectName": "media"
+            "projectName": "media",
+            "args": "--dir=data"
         }
     ]
 }
