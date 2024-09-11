@@ -16,7 +16,7 @@ import org.springframework.web.service.annotation.PostExchange;
 public interface OllamaPort {
 
   @PostExchange("api/generate")
-  RenerateResult generate(@RequestBody GenerateBody body);
+  GenerateResult generate(@RequestBody GenerateBody body);
   
   /** https://github.com/ollama/ollama/blob/main/docs/api.md#list-local-models */
   @GetExchange("api/tags")
@@ -34,7 +34,7 @@ public interface OllamaPort {
 
   record EmbeddingsResult(double[] embedding) { }
 
-  record RenerateResult(String model, LocalDateTime createdAt, String response, boolean done, int[] context,
+  record GenerateResult(String model, LocalDateTime createdAt, String response, boolean done, int[] context,
       long totalDuration, long loadDuration, int promptEvalCount, long promptEvalDuration, int intevalCount,
       long evalDuration) {
   }

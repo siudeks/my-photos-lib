@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
@@ -22,8 +23,9 @@ public class FileActorFactory implements Runnable, SmartLifecycle {
 
   private final FileEvents fileEvents;
   private final StateListeners stateListeners;
-  private ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
   private final ImageDescService imageDescService;
+  private final VectorStore vectorStore;
+  private ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
   // Path - identitiy of collecting events
   // PriorityBlockingQueue - with prioretization to allow inform early about
@@ -47,7 +49,7 @@ public class FileActorFactory implements Runnable, SmartLifecycle {
               var messages = new LinkedBlockingQueue<FileActor.Command>();
               var initialMessage = new FileActor.Command.Process();
               messages.offer(initialMessage);
-              var actor1 = new FileActor(key, messages, stateListeners, imageDescService);
+              var actor1 = new FileActor(key, messages, stateListeners, imageDescService, vectorStore);
               executorService.submit(actor1);
               return messages;
             } catch (Exception ex) {

@@ -20,7 +20,7 @@
     },
     "ghcr.io/devcontainers/features/java:1": {
       // version and jdkDistro values comes from values displyed as output of 'sdk list java'
-      "version": "22.0.2",
+      "version": " 21.0.4.crac",
       "jdkDistro": "librca",
       "installMaven": "true",
       "installGradle": "false"
@@ -50,7 +50,8 @@
         "vmware.vscode-boot-dev-pack",
         "ms-python.python",
         "ms-toolsai.jupyter",
-        "jebbs.plantuml"
+        "jebbs.plantuml",
+        "oracle-labs-graalvm.visualvm-vscode"
       ]
     }
   }

@@ -6,21 +6,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.support.RestClientAdapter;
-import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
+import lombok.RequiredArgsConstructor;
+import net.siudek.media.ai.OllamaPort.EmbeddingsBody;
 import net.siudek.media.domain.ImageDescService;
 
 @Component
+@RequiredArgsConstructor
 class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle {
 
-  @Value("${spring.ai.ollama.base-url}")
-  String apiHost;
-
+  private final OllamaPort ollamaService;
   private volatile boolean isRunning;
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
   private final BlockingQueue<Command> commands = new LinkedBlockingQueue<>();
@@ -32,14 +29,19 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle {
   }
 
   @Override
+  public void asEmbeddings(String text, Consumer<double[]> responseHandler) {
+    var cmd = new Command.GetEmbeddings(text, responseHandler);
+    commands.offer(cmd);
+  }
+
+  @Override
   public void run() {
     while (true) {
       try {
         var event = commands.take();
         switch (event) {
-          case Command.DescribeImage(var jpgBase64, var callback): {
-            execute(jpgBase64, callback);
-          }
+          case Command.DescribeImage(var jpgBase64, var callback) -> execute(jpgBase64, callback);
+          case Command.GetEmbeddings(var description, var callback) -> embeddings(description, callback);
         }
 
       } catch (InterruptedException e) {
@@ -51,12 +53,6 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle {
   }
 
   private void execute(String jpgBase64, Consumer<String> callback) {
-    var restClient = RestClient.builder().baseUrl(apiHost).build();
-    var adapter = RestClientAdapter.create(restClient);
-    var factory = HttpServiceProxyFactory.builderFor(adapter).build();
-
-    var ollamaService = factory.createClient(OllamaPort.class);
-
     Models.assureModelsAvailable(ollamaService.list());
 
     var llavaModelName = Models.Llava_v16_p7b.getNameAndTag();
@@ -64,6 +60,15 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle {
     var responseText = response.response();
     callback.accept(responseText);
   }
+
+  private void embeddings(String description, Consumer<double[]> callback) {
+    Models.assureModelsAvailable(ollamaService.list());
+
+    var modelName = Models.mxbai_embed_large.getNameAndTag();
+    var response = ollamaService.embeddings(new EmbeddingsBody(modelName, description)).embedding();
+    callback.accept(response);
+  }
+
 
   @Override
   public void start() {
@@ -83,7 +88,13 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle {
   }
 
   sealed interface Command {
+
     record DescribeImage(String jpgBase64, Consumer<String> callback) implements Command {
     }
+
+    record GetEmbeddings(String description, Consumer<double[]> callback) implements Command {
+    }
+
   }
+
 }

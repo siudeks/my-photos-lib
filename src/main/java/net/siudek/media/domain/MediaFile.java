@@ -2,8 +2,11 @@ package net.siudek.media.domain;
 
 import java.nio.file.Path;
 
-public sealed interface MediaFile permits Image, MediaFile.Sha256 {
+public sealed interface MediaFile permits Image,
+                                          MediaFile.Sha256,
+                                          MediaFile.Desc {
   
     record Sha256(Path path) implements MediaFile { }
+    record Desc(Path path) implements MediaFile { }
 
 }

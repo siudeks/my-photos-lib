@@ -14,5 +14,5 @@ public sealed interface FileProcessingState {
   record Described(Path path) implements FileProcessingState { } // meta file created
 
   /** Image data is already in vector database, ready for use. */
-  record Indexed(Path path) implements FileProcessingState { } // 
+  record Indexed(Path path) implements FileProcessingState { } 
 }

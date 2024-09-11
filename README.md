@@ -19,7 +19,7 @@ Application needs to have access to libheif, so you have to add extra applicatio
 as application is linked with libheif
 
 ### To small fonts in visualVM?
-Add to ~~./bashrc:
+Add to ~/.bashrc:
 export GDK_SCALE=2
 export GDK_DPI_SCALE=0.75
 

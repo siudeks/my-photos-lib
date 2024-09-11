@@ -5,7 +5,12 @@ import static com.google.common.io.Files.asByteSource;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.VectorStore;
 
 import com.google.common.base.Objects;
 import com.google.common.hash.HashCode;
@@ -22,6 +27,7 @@ class FileActor implements Runnable {
   private final BlockingQueue<Command> messages;
   private final StateListeners stateListeners;
   private final ImageDescService imageDescService;
+  private final VectorStore vectorStore; // move saving to database to a separate service, not in actor
 
   @Override
   public void run() {
@@ -40,6 +46,9 @@ class FileActor implements Runnable {
     switch (cmd) {
       case Command.Process it: {
 
+        var evt1 = new FileProcessingState.Discovered(self.path());
+        stateListeners.on(evt1);
+
         {
           createChecksumFile(self.path());
           var evt2 = new FileProcessingState.Hashed(self.path());
@@ -54,15 +63,21 @@ class FileActor implements Runnable {
       }
 
       case Command.ApplyDescription(var description): {
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        log.info(description);
-        log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        var evt1 = new FileProcessingState.Discovered(self.path());
+
+        if (!createDescriptionFile(self.path(), description)) return;
+
+        var evt1 = new FileProcessingState.Described(self.path());
         stateListeners.on(evt1);
+
+        var id = self.path().toAbsolutePath().toString(); // TODO reuse hash as key. Any other ideas?
+
+        var doc = new Document(id, description, Map.of());
+        vectorStore.add(List.of(doc));
       }
     }
   }
 
+  
   private void handleResponse(String imageDesc) {
     var msg = new Command.ApplyDescription(imageDesc);
     messages.offer(msg); // TODO handle failure
@@ -73,12 +88,16 @@ class FileActor implements Runnable {
     imageDescService.request(jpgBase64, this::handleResponse);
   }
 
-  void createChecksumFile(Path media) {
-    var mediaFile = media.toFile();
-    var mediaFileName = media.toFile().getName();
-    var checksumFile = media.resolveSibling(mediaFileName + ".sha256");
+  Path siblingFile(Path mainFile, String extension) {
+    var mediaFileName = mainFile.toFile().getName();
+    var result = mainFile.resolveSibling(mediaFileName + extension);
+    return result;
+  }
 
-    var hash = switch (Try.of(() -> asByteSource(mediaFile).hash(Hashing.sha256()))) {
+  void createChecksumFile(Path media) {
+    var checksumFile = siblingFile(media, ".sha256");
+
+    var hash = switch (Try.of(() -> asByteSource(media.toFile()).hash(Hashing.sha256()))) {
       case Try.Value<HashCode>(HashCode value) -> {
         yield value.toString();
       }
@@ -93,31 +112,55 @@ class FileActor implements Runnable {
 
     // read already created hash file, if exists
     var skipChecksum = Files.exists(checksumFile) && switch (Try.of(() -> Files.readAllBytes(checksumFile))) {
-    case Try.Value<byte[]>(var value) -> Objects.equal(new String(value), hash);
-    case Try.Error(var ex) -> false;
+      case Try.Value<byte[]>(var value) -> Objects.equal(new String(value), hash);
+      case Try.Error(var ex) -> false;
     };
 
     if (!skipChecksum) {
       switch (Try.of(() -> Files.writeString(checksumFile, hash, StandardOpenOption.CREATE))) {
-      case Try.Value<Path>(var value): {
-        // success
-        break;
-      }
-      case Try.Error(var ex): {
-        log.error("sha256 store error", ex);
-      }
+        case Try.Value<Path>(var value): {
+          // success
+          break;
+        }
+        case Try.Error(var ex): {
+          log.error("sha256 store error", ex);
+        }
       }
     }
 
   }
 
+  /**
+   * Saves file with text description of the image. Skips description file if exist.
+   */
+  private boolean createDescriptionFile(Path media, String description) {
+    var descFile = siblingFile(media, ".v1.desc");
+    if (Files.exists(descFile)) {
+      return false;
+    }
+    switch (Try.of(() -> Files.writeString(descFile, description, StandardOpenOption.CREATE))) {
+      case Try.Value<Path>(var value): {
+        // success
+        return true;
+      }
+      case Try.Error(var ex): {
+        log.error("sha256 store error", ex);
+        return false;
+      }
+    }
+  }
+ 
+  /** List of commands supported by the actor. */
   sealed interface Command {
 
     record Process() implements Command {
     }
 
     record ApplyDescription(String description) implements Command {
-
     }
+
   }
+
+
+
 }

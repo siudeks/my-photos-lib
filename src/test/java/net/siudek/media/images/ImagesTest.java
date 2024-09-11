@@ -53,13 +53,12 @@ public class ImagesTest {
 
     for (var image: images) {
       switch (image) {
-        case MediaFile.Sha256 _: {
-          break;
-        }
         case Image it: {
           @SuppressWarnings("unused")
           var asBase64 = ImageUtils.asJpegBase64(it);
         }
+        default:
+          break;
       }
     }
   }
@@ -102,12 +101,10 @@ public class ImagesTest {
           Files.touch(asPath.toFile());
           var asImage = ImageUtils.asMediaFile(asPath);
           switch (asImage) {
-            case MediaFile.Sha256 _: {
-              break;
-            }
             case Image im: {
               expected.add(im);
             }
+            default: break;
           }
           
         }

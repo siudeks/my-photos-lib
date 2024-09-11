@@ -35,9 +35,6 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
       while(iterables.hasNext()) {
         var file = iterables.next();
         switch (file) {
-          case MediaFile.Sha256 _: {
-            continue;
-          }
           case Image it: {
             try {
               fileEvents.put(new FileEvent.Found(it));
@@ -45,7 +42,8 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
               Thread.currentThread().interrupt();
               break;
             }
-              }
+          }
+          default: continue;
         }
       }
     };

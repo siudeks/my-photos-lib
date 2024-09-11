@@ -8,14 +8,12 @@ import java.util.Base64;
 
 import javax.imageio.ImageIO;
 
-import org.springframework.boot.autoconfigure.ssl.SslProperties.Bundles.Watch.File;
 import org.springframework.util.Assert;
 
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import net.siudek.media.utils.FileUtils;
-import net.siudek.media.utils.SafeCloseable;
 
 @UtilityClass
 public class ImageUtils {
@@ -27,6 +25,7 @@ public class ImageUtils {
       case "png" -> new Image.PNG(image);
       case "heic" -> new Image.HEIC(image);
       case "sha256" -> new MediaFile.Sha256(image);
+      case "desc" -> new MediaFile.Desc(image);
       default -> throw new IllegalArgumentException("File extension [" + ext + "] is not supported.");
     };
   }
