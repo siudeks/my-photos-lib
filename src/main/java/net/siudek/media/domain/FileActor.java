@@ -2,6 +2,7 @@ package net.siudek.media.domain;
 
 import static com.google.common.io.Files.asByteSource;
 
+import java.util.UUID;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -69,10 +70,15 @@ class FileActor implements Runnable {
         var evt1 = new FileProcessingState.Described(self.path());
         stateListeners.on(evt1);
 
-        var id = self.path().toAbsolutePath().toString(); // TODO reuse hash as key. Any other ideas?
+        var id = UUID.randomUUID().toString();
+        var location = self.path().toAbsolutePath().toString();
 
-        var doc = new Document(id, description, Map.of());
+        var doc = new Document(id, description, Map.of("location", location));
         vectorStore.add(List.of(doc));
+
+        var evt2 = new FileProcessingState.Indexed(self.path());
+        stateListeners.on(evt2);
+
       }
     }
   }

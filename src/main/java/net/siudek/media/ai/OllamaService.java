@@ -10,15 +10,17 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 import net.siudek.media.ai.OllamaPort.EmbeddingsBody;
 import net.siudek.media.domain.ImageDescService;
 
 @Component
 @RequiredArgsConstructor
-class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle {
+class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle, AutoCloseable {
 
   private final OllamaPort ollamaService;
   private volatile boolean isRunning;
+  @Delegate
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
   private final BlockingQueue<Command> commands = new LinkedBlockingQueue<>();
 
@@ -53,8 +55,6 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle {
   }
 
   private void execute(String jpgBase64, Consumer<String> callback) {
-    Models.assureModelsAvailable(ollamaService.list());
-
     var llavaModelName = Models.Llava_v16_p7b.getNameAndTag();
     var response = ollamaService.generate(new GenerateBody(llavaModelName, "Describe the photo.", false, new String[] { jpgBase64 }));
     var responseText = response.response();

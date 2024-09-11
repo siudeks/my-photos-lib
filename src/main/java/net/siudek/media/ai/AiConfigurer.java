@@ -16,6 +16,8 @@ public class AiConfigurer {
     var adapter = RestClientAdapter.create(restClient);
     var factory = HttpServiceProxyFactory.builderFor(adapter).build();
 
-    return factory.createClient(OllamaPort.class);
+    var result = factory.createClient(OllamaPort.class);
+    Models.assureModelsAvailable(result.list());
+    return result;
   }
 }

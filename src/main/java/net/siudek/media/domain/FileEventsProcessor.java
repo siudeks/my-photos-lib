@@ -10,12 +10,15 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
+
+  @Delegate
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
   private final MediaSearch images;
@@ -49,11 +52,6 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
     };
   }
 
-
-  @Override
-  public void close() throws Exception {
-    vExecutor.close();
-  }
 
   @Override
   public void start() {

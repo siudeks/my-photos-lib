@@ -10,6 +10,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,12 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class FileActorFactory implements Runnable, SmartLifecycle {
+public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable {
 
   private final FileEvents fileEvents;
   private final StateListeners stateListeners;
   private final ImageDescService imageDescService;
   private final VectorStore vectorStore;
+  @Delegate
   private ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
   // Path - identitiy of collecting events

@@ -41,7 +41,7 @@ import net.siudek.media.utils.SafeCloseable;
 )
 @DirtiesContext
 @Import(value = ProgramTests.MyListener.class)
-@Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 100)
+@Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 300)
 public class ProgramTests {
 
   @Autowired
@@ -67,7 +67,7 @@ public class ProgramTests {
     // wait when all files are discovered
     // we know there are 3 images
     var awaiter = listener.registerWaiter(it -> {
-      return it.discovered() == 3;
+      return it.indexed() == 3;
     });
     awaiter.await();
 
@@ -82,7 +82,7 @@ public class ProgramTests {
 
     // wait when all files are discovered
     // we know there are 3 images
-    var awaiter = listener.registerWaiter(it -> it.discovered() == 3);
+    var awaiter = listener.registerWaiter(it -> it.indexed() == 3);
     awaiter.await();
 
     var files = fileView.find("Image with a dog");
@@ -98,7 +98,7 @@ public class ProgramTests {
   public static class MyListener implements StateListener {
     record Context(State lastKnown, CountDownLatch locker) { }
 
-    private State current = new State(0);
+    private State current = new State(0, 0);
 
     private Semaphore notifyListenersLock = new Semaphore(1);
     private HashMap<Function<State, Boolean>, Context> listeners = new HashMap<>();
@@ -131,13 +131,14 @@ public class ProgramTests {
     private void changeState(FileProcessingState event) {
       switch (event) {
         case FileProcessingState.Discovered it:
-          current = new State(current.discovered() + 1);
+          current = new State(current.discovered() + 1, current.indexed());
           break;
         case FileProcessingState.Hashed it:
           break;
         case FileProcessingState.Described it:
           break;
         case FileProcessingState.Indexed it:
+          current = new State(current.discovered(), current.indexed()+1);
           break;
       }
     }
