@@ -3,10 +3,8 @@ package net.siudek.media.utils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.cglib.core.internal.Function;
 
-import lombok.experimental.UtilityClass;
 import java.nio.file.Path;
 
-@UtilityClass
 public class FileUtils {
 
   public static <T> T asFilename(Path image, Function<Filename, T> extractor) {

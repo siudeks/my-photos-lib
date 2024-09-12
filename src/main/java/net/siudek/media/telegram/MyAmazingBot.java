@@ -2,6 +2,7 @@ package net.siudek.media.telegram;
 
 import java.io.File;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
@@ -15,29 +16,31 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
 @Component
-@RequiredArgsConstructor
 public class MyAmazingBot implements UpdateConsumer {
 
     private final TelegramBotsLongPollingApplication telegramBotsLongPollingApplication;
     private final TelegramProperties telegramProperties;
     private final VectorStore vectorStore;
 
+    public MyAmazingBot(TelegramBotsLongPollingApplication telegramBotsLongPollingApplication, TelegramProperties telegramProperties, VectorStore vectorStore) {
+      this.telegramBotsLongPollingApplication = telegramBotsLongPollingApplication;
+      this.telegramProperties = telegramProperties;
+      this.vectorStore = vectorStore;
+    }
+
     private TelegramClient telegramClient;
 
     @PostConstruct
     public void init() throws TelegramApiException {
-        var token = telegramProperties.getSecret();
+        var token = telegramProperties.secret();
         telegramClient = new OkHttpTelegramClient(token);
         telegramBotsLongPollingApplication.registerBot(token, this);
     }
 
     @Override
-    @SneakyThrows
-    public void consume(Update update) {
+    public void consume(Update update) throws TelegramApiException {
         var hasMessage = update.hasMessage() && update.getMessage().hasText();
         if (!hasMessage)
             return;

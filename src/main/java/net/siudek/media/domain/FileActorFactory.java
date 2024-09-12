@@ -5,28 +5,32 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * The processor is responsible to handle all file-events and processing each
  * file
  */
 @Component
-@Slf4j
-@RequiredArgsConstructor
 public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable {
 
+  static Logger log = LoggerFactory.getLogger(FileActorFactory.class);
   private final FileEvents fileEvents;
+  public FileActorFactory(FileEvents fileEvents, StateListeners stateListeners, ImageDescService imageDescService, VectorStore vectorStore) {
+    this.fileEvents = fileEvents;
+    this.stateListeners = stateListeners;
+    this.imageDescService = imageDescService;
+    this.vectorStore = vectorStore;
+  }
+
   private final StateListeners stateListeners;
   private final ImageDescService imageDescService;
   private final VectorStore vectorStore;
-  @Delegate
+
   private ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
   // Path - identitiy of collecting events
@@ -60,6 +64,9 @@ public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable
           });
           break;
         }
+        case FileEvent.Created it: {
+          break;
+        }
         case FileEvent.Changed it: {
           break;
         }
@@ -90,6 +97,11 @@ public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable
   @Override
   public boolean isRunning() {
     return isRunning;
+  }
+
+  @Override
+  public void close() throws Exception {
+    this.executorService.close();
   }
 
 }

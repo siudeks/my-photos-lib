@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 
@@ -17,14 +19,20 @@ import com.google.common.base.Objects;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 /** Blocking actor, using provided queueas source of messages. */
-@Slf4j
-@RequiredArgsConstructor
 class FileActor implements Runnable {
+
+  static Logger log = LoggerFactory.getLogger(FileActor.class);
+
   private final Image self;
+  public FileActor(Image self, BlockingQueue<Command> messages, StateListeners stateListeners, ImageDescService imageDescService, VectorStore vectorStore) {
+    this.self = self;
+    this.messages = messages;
+    this.stateListeners = stateListeners;
+    this.imageDescService = imageDescService;
+    this.vectorStore = vectorStore;
+  }
+
   private final BlockingQueue<Command> messages;
   private final StateListeners stateListeners;
   private final ImageDescService imageDescService;
@@ -39,11 +47,14 @@ class FileActor implements Runnable {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         break;
+      } catch (Exception ex) {
+        // TODO
+        break;
       }
     }
   }
 
-  private void handle(Command cmd) {
+  private void handle(Command cmd) throws Exception {
     switch (cmd) {
       case Command.Process it: {
 
@@ -89,7 +100,7 @@ class FileActor implements Runnable {
     messages.offer(msg); // TODO handle failure
   }
 
-  private void requestImageDesc(Image mediaFile) {
+  private void requestImageDesc(Image mediaFile) throws Exception {
     var jpgBase64 = ImageUtils.asJpegBase64(mediaFile);
     imageDescService.request(jpgBase64, this::handleResponse);
   }

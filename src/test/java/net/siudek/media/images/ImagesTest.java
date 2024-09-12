@@ -1,6 +1,7 @@
 package net.siudek.media.images;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,15 +17,13 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.tngtech.archunit.thirdparty.com.google.common.io.Files;
 
-import lombok.SneakyThrows;
 import net.siudek.media.domain.Image;
 import net.siudek.media.domain.ImageUtils;
-import net.siudek.media.domain.MediaFile;
 
 public class ImagesTest {
 
   @Test
-  void shouldFindMediaFiles(@TempDir File temp) {
+  void shouldFindMediaFiles(@TempDir File temp) throws IOException {
     // some list of files, to include subfolder and all image types which should be supported
     var dirSchema = newDir("rootDir",
         newImage("image1.jpg"),
@@ -42,7 +41,7 @@ public class ImagesTest {
   }
 
   @Test
-  void shouldProcessExampleFiles() {
+  void shouldProcessExampleFiles() throws Exception {
     var exampleMediaDir = Path.of("./data");
 
     var actualIter = new Images().find(exampleMediaDir.toFile());
@@ -80,12 +79,11 @@ public class ImagesTest {
   }
 
   // creates requested list of files and returns expected list of images 
-  static Collection<Image> create(File root, DirOrFile.Dir dir) {
+  static Collection<Image> create(File root, DirOrFile.Dir dir) throws IOException {
     return create(root, dir, new ArrayList<>());
   }
 
-  @SneakyThrows
-  static Collection<Image> create(File root, DirOrFile.Dir dir, Collection<Image> expected) {
+  static Collection<Image> create(File root, DirOrFile.Dir dir, Collection<Image> expected) throws IOException {
     var curDir = new File(root, dir.name);
     curDir.mkdir(); // try to create current folder if it does not exist
     for (var f : dir.images()) {

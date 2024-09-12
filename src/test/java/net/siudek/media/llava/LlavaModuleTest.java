@@ -24,7 +24,6 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
-import lombok.SneakyThrows;
 import net.siudek.media.Program;
 import net.siudek.media.ai.GenerateBody;
 import net.siudek.media.ai.Models;
@@ -49,8 +48,7 @@ public class LlavaModuleTest {
   String apiHost;
 
   @Test
-  @SneakyThrows
-  void shouldAccestHost() {
+  void shouldAccestHost() throws Exception {
 
     // https://docs.spring.io/spring-framework/reference/integration/rest-clients.html
     var restClient = RestClient.builder().baseUrl(apiHost).build();
@@ -72,11 +70,11 @@ public class LlavaModuleTest {
     };
 
     var jpgBase64 = ImageUtils.asJpegBase64(asImage);
-    var llavaModelName = Models.Llava_v16_p7b.getNameAndTag();
+    var llavaModelName = Models.Llava_v16_p7b.nameAndTag;
     var response = ollamaService.generate(new GenerateBody(llavaModelName, "Describe the photo.", false, new String[] { jpgBase64 }));
     var responseText = response.response();
 
-    var embeddingsModelName = Models.Llama_v31_p8b.getModelName();
+    var embeddingsModelName = Models.Llama_v31_p8b.modelName;
     var embeddingResponse1 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, responseText));
 
 
@@ -84,13 +82,12 @@ public class LlavaModuleTest {
   }
 
   @Test
-  @SneakyThrows
   // not yet available
   // https://github.com/spring-projects/spring-ai/issues/421
   void useSpringAi() {
     var data = new ClassPathResource("llava/example1.jpg");
     var userMessage = new UserMessage("Explain what do you see on this picture?", List.of(new Media(MimeTypeUtils.IMAGE_JPEG, data)));
-    var options1 = OllamaOptions.create().withModel(Models.Llava_v16_p7b.getNameAndTag()).withTemperature(0f);
+    var options1 = OllamaOptions.create().withModel(Models.Llava_v16_p7b.nameAndTag).withTemperature(0f);
     var prompt = new Prompt(userMessage, options1);
 
     var chatClient = ChatClient.builder(chatModel).defaultOptions(options1).build();
@@ -123,7 +120,7 @@ public class LlavaModuleTest {
     var sent1 = "This is the first sentence.";
     var sent2 = "This is the second sentence.";
 
-    var embeddingsModelName = Models.Llama_v31_p8b.getNameAndTag();
+    var embeddingsModelName = Models.Llama_v31_p8b.nameAndTag;
     var embed1 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, sent1)).embedding();
     var embed2 = ollamaService.embeddings(new EmbeddingsBody(embeddingsModelName, sent2)).embedding();
     
@@ -146,7 +143,7 @@ public class LlavaModuleTest {
   }
 
   double similarity(String actual, String expected, Models model) {
-    var options2 = OllamaOptions.create().withModel(model.getNameAndTag()).withTemperature(0f);
+    var options2 = OllamaOptions.create().withModel(model.nameAndTag).withTemperature(0f);
     var expectedAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(expected), options2));
     var actualAsEmbeddings = embeddingModel.call(new EmbeddingRequest(List.of(actual), options2));
     return Similarity.cosine3(expectedAsEmbeddings.getResult().getOutput(), actualAsEmbeddings.getResult().getOutput());

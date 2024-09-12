@@ -9,18 +9,19 @@ import java.util.function.Consumer;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
 import net.siudek.media.ai.OllamaPort.EmbeddingsBody;
 import net.siudek.media.domain.ImageDescService;
 
 @Component
-@RequiredArgsConstructor
 class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle, AutoCloseable {
 
   private final OllamaPort ollamaService;
+
+  public LlavaServiceImpl(OllamaPort ollamaService) {
+    this.ollamaService = ollamaService;
+  }
+
   private volatile boolean isRunning;
-  @Delegate
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
   private final BlockingQueue<Command> commands = new LinkedBlockingQueue<>();
 
@@ -55,7 +56,7 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle, Au
   }
 
   private void execute(String jpgBase64, Consumer<String> callback) {
-    var llavaModelName = Models.Llava_v16_p7b.getNameAndTag();
+    var llavaModelName = Models.Llava_v16_p7b.nameAndTag;
     var response = ollamaService.generate(new GenerateBody(llavaModelName, "Describe the photo.", false, new String[] { jpgBase64 }));
     var responseText = response.response();
     callback.accept(responseText);
@@ -64,7 +65,7 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle, Au
   private void embeddings(String description, Consumer<double[]> callback) {
     Models.assureModelsAvailable(ollamaService.list());
 
-    var modelName = Models.mxbai_embed_large.getNameAndTag();
+    var modelName = Models.mxbai_embed_large.nameAndTag;
     var response = ollamaService.embeddings(new EmbeddingsBody(modelName, description)).embedding();
     callback.accept(response);
   }
@@ -95,6 +96,11 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle, Au
     record GetEmbeddings(String description, Consumer<double[]> callback) implements Command {
     }
 
+  }
+
+  @Override
+  public void close() throws Exception {
+    vExecutor.close();
   }
 
 }

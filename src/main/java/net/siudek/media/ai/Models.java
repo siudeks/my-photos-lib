@@ -1,7 +1,5 @@
 package net.siudek.media.ai;
 
-import lombok.Getter;
-
 /**
  * To define closed list of model used for work on images, we defined all of them in {@see Models} enum.
  */
@@ -23,11 +21,9 @@ public enum Models {
 
     mxbai_embed_large("mxbai-embed-large:335m-v1-fp16");
 
-    @Getter
-    private final String modelName;
+    public final String modelName;
 
-    @Getter
-    private final String nameAndTag;
+    public final String nameAndTag;
 
     private Models(String nameAndTag) {
         String[] parts = nameAndTag.split(":");

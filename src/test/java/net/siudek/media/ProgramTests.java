@@ -21,9 +21,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 
-import lombok.Cleanup;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import net.siudek.media.domain.FileProcessingState;
 import net.siudek.media.domain.FileView;
 import net.siudek.media.domain.Image;
@@ -62,8 +59,7 @@ public class ProgramTests {
   }
 
   @Test
-  @SneakyThrows
-  void shouldFindNoFile() {
+  void shouldFindNoFile() throws InterruptedException {
     // wait when all files are discovered
     // we know there are 3 images
     var awaiter = listener.registerWaiter(it -> {
@@ -77,8 +73,7 @@ public class ProgramTests {
   }
 
   @Test
-  @SneakyThrows
-  void shouldFindDogFile() {
+  void shouldFindDogFile() throws InterruptedException {
 
     // wait when all files are discovered
     // we know there are 3 images
@@ -94,7 +89,6 @@ public class ProgramTests {
   }
 
   @Component
-  @Slf4j
   public static class MyListener implements StateListener {
     record Context(State lastKnown, CountDownLatch locker) { }
 
@@ -179,8 +173,8 @@ public class ProgramTests {
         return defaultWhenInterrupted.get();
       }
 
-      @Cleanup
-      var closer = (SafeCloseable) () -> notifyListenersLock.release();
+      
+      try (var closer = (SafeCloseable) () -> notifyListenersLock.release()) { }
       return task.get();
     }
   }

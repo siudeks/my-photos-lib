@@ -9,6 +9,9 @@ public sealed interface FileEvent {
   record Found(Image path) implements FileEvent {
   }
 
+  /** New file has been just created */
+  record Created(Path value) implements FileEvent { }
+
   /** Some changed on the file to process. */
   record Changed(Path path) implements FileEvent {
   }

@@ -13,8 +13,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import net.siudek.media.domain.ImageUtils;
 import net.siudek.media.domain.MediaFile;
 import net.siudek.media.domain.MediaSearch;
@@ -23,7 +21,6 @@ import net.siudek.media.domain.MediaSearch;
  * Finds and observes lifecycle of all images in requested folder(s). For each image identifies its state and applies next steps of image recognition.
  */
 @Component
-@RequiredArgsConstructor
 class Images implements MediaSearch {
 
   @Override
@@ -34,15 +31,22 @@ class Images implements MediaSearch {
     return items.stream().map(ImageUtils::asMediaFile).iterator();
   }
 
-  @SneakyThrows
   void run(File root, Visitor visitor) {
-    Files.walkFileTree(root.toPath(), visitor);
+    try {
+      Files.walkFileTree(root.toPath(), visitor);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
-  @RequiredArgsConstructor
   final class Visitor implements FileVisitor<Path> {
 
     private final BlockingQueue<Path> queue;
+
+    public Visitor(BlockingQueue<Path> queue) {
+      this.queue = queue;
+    }
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {

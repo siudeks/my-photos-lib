@@ -9,19 +9,17 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
 
-  @Delegate
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
   private final MediaSearch images;
+  public FileEventsProcessor(MediaSearch images, FileEvents fileEvents) {
+    this.images = images;
+    this.fileEvents = fileEvents;
+  }
+
   private final FileEvents fileEvents;
 
   /* Starting point as we have initial applicatio nargs to start the flow. */
@@ -67,6 +65,11 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
   @Override
   public boolean isRunning() {
     return isRunning;
+  }
+
+  @Override
+  public void close() throws Exception {
+    vExecutor.close();
   }
   
 }
