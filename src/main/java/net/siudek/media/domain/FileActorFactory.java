@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable {
 
   static Logger log = LoggerFactory.getLogger(FileActorFactory.class);
-  private final FileEvents fileEvents;
-  public FileActorFactory(FileEvents fileEvents, StateListeners stateListeners, ImageDescService imageDescService, VectorStore vectorStore) {
+  private final FileEventQueue fileEvents;
+  public FileActorFactory(FileEventQueue fileEvents, StateListeners stateListeners, ImageDescService imageDescService, VectorStore vectorStore) {
     this.fileEvents = fileEvents;
     this.stateListeners = stateListeners;
     this.imageDescService = imageDescService;

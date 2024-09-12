@@ -23,7 +23,7 @@ import net.siudek.media.domain.ImageUtils;
 public class ImagesTest {
 
   @Test
-  void shouldFindMediaFiles(@TempDir File temp) throws IOException {
+  void shouldFindMediaFiles(@TempDir Path temp) throws IOException {
     // some list of files, to include subfolder and all image types which should be supported
     var dirSchema = newDir("rootDir",
         newImage("image1.jpg"),
@@ -44,7 +44,7 @@ public class ImagesTest {
   void shouldProcessExampleFiles() throws Exception {
     var exampleMediaDir = Path.of("./data");
 
-    var actualIter = new Images().find(exampleMediaDir.toFile());
+    var actualIter = new Images().find(exampleMediaDir);
     var actualSpliter = Spliterators.spliteratorUnknownSize(actualIter, Spliterator.NONNULL);
     var images = StreamSupport.stream(actualSpliter, false)
         .toList();
@@ -79,19 +79,19 @@ public class ImagesTest {
   }
 
   // creates requested list of files and returns expected list of images 
-  static Collection<Image> create(File root, DirOrFile.Dir dir) throws IOException {
+  static Collection<Image> create(Path root, DirOrFile.Dir dir) throws IOException {
     return create(root, dir, new ArrayList<>());
   }
 
-  static Collection<Image> create(File root, DirOrFile.Dir dir, Collection<Image> expected) throws IOException {
-    var curDir = new File(root, dir.name);
+  static Collection<Image> create(Path root, DirOrFile.Dir dir, Collection<Image> expected) throws IOException {
+    var curDir = new File(root.toFile(), dir.name);
     curDir.mkdir(); // try to create current folder if it does not exist
     for (var f : dir.images()) {
       switch (f) {
         case DirOrFile.Dir it: {
           Path subdir = Paths.get(curDir.getAbsolutePath(), it.name());
           subdir.toFile().mkdir();
-          create(subdir.toFile(), it, expected);
+          create(subdir, it, expected);
           break;
         }
         case DirOrFile.Image it: {

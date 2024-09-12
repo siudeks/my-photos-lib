@@ -12,5 +12,4 @@ public interface CloseableQueue<T> {
   void put(T e) throws InterruptedException;
 
   T take() throws InterruptedException;
-
 }

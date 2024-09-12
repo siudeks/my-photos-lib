@@ -15,15 +15,16 @@ import net.siudek.media.utils.FileUtils;
 
 public class ImageUtils {
 
-  public static MediaFile asMediaFile(Path image) {
-    var ext = FileUtils.asFilename(image, it -> it.ext());
+  public static MediaFile asMediaFile(Path maybeImage) {
+    var ext = FileUtils.asFilename(maybeImage, it -> it.ext());
     return switch (ext) {
-      case "jpg" -> new Image.JPG(image);
-      case "png" -> new Image.PNG(image);
-      case "heic" -> new Image.HEIC(image);
-      case "sha256" -> new MediaFile.Sha256(image);
-      case "desc" -> new MediaFile.Desc(image);
-      case "ignore" -> new MediaFile.Ignore(image);
+      case "jpg" -> new Image.JPG(maybeImage);
+      case "png" -> new Image.PNG(maybeImage);
+      case "heic" -> new Image.HEIC(maybeImage);
+      case "sha256" -> new MediaFile.Sha256(maybeImage);
+      case "desc" -> new MediaFile.Desc(maybeImage);
+      case "" -> new MediaFile.Ignore(maybeImage);
+      case "ignore" -> new MediaFile.Ignore(maybeImage);
       default -> throw new IllegalArgumentException("File extension [" + ext + "] is not supported.");
     };
   }

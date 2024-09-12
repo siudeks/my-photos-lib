@@ -6,4 +6,5 @@ app.jfr
 
 target/
 
-*.sha256
+# *.sha256
+# *.v1.desc

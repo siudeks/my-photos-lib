@@ -24,10 +24,10 @@ import net.siudek.media.domain.MediaSearch;
 class Images implements MediaSearch {
 
   @Override
-  public Iterator<MediaFile> find(File root) {
+  public Iterator<MediaFile> find(Path root) {
     var items = new LinkedBlockingQueue<Path>();
     var visitor = new Visitor(items);
-    run(root, visitor);
+    run(root.toFile(), visitor);
     return items.stream().map(ImageUtils::asMediaFile).iterator();
   }
 

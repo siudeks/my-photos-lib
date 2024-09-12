@@ -2,6 +2,10 @@ package net.siudek.media.domain;
 
 sealed interface Try<T> {
 
+  static Try<Void> of(CheckedRunnable runnable) {
+    return of(() -> { runnable.run(); return null; });
+  }
+
   @SuppressWarnings("unchecked")
   static <T> Try<T> of(CheckedSupplier<T> supplier) {
     try {

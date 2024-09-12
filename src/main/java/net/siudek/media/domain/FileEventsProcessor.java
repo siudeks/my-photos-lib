@@ -1,26 +1,35 @@
 package net.siudek.media.domain;
 
-import java.nio.file.Path;
+import static java.nio.file.StandardWatchEventKinds.*;
+
+import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/**
+ * Reads initial list of files using {@link MediaSearch} and watches all changes in discovered folders / files.
+ * All events has been stored in {@link FileEvents}
+ * More: https://docs.oracle.com/javase/tutorial/essential/io/notification.html
+ */
 @Service
 public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
 
+  private final FileEventQueue fileEvents;
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
+  private final CompositeCloseable disposer = Closeables.of(vExecutor);
 
-  private final MediaSearch images;
-  public FileEventsProcessor(MediaSearch images, FileEvents fileEvents) {
-    this.images = images;
+  public FileEventsProcessor(FileEventQueue fileEvents) {
     this.fileEvents = fileEvents;
   }
 
-  private final FileEvents fileEvents;
 
   /* Starting point as we have initial applicatio nargs to start the flow. */
   @EventListener
@@ -31,25 +40,78 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
   }
 
   public Runnable asRunnable(Path root) {
-    return () -> {
-      var iterables = images.find(root.toFile());
-      while(iterables.hasNext()) {
-        var file = iterables.next();
-        switch (file) {
-          case Image it: {
-            try {
-              fileEvents.put(new FileEvent.Found(it));
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-              break;
-            }
+    var fs = root.getFileSystem();
+    var watcher = switch(Try.of(fs::newWatchService)) {
+      case Try.Value<WatchService>(var value) -> value;
+      case Try.Error(IOException ex) -> null;
+      case Try.Error(Exception ex) -> null;
+    };
+    // if we can't start, lets just return noop
+    if (watcher == null) return () -> { };
+    disposer.add(watcher);
+
+    Consumer<Path> onExistingFile = path -> {
+      var asMedia = ImageUtils.asMediaFile(path);
+      switch (asMedia) {
+        case Image im: {
+          try {
+            fileEvents.put(new FileEvent.Found(im));
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // no idea what to do else ... TODO
           }
-          default: continue;
         }
+        default: break;
       }
     };
+
+    return () -> runnable(root, watcher, onExistingFile);
   }
 
+  private void runnable(Path root, WatchService watcher, Consumer<Path> onExistingFile) {
+
+    switch(Try.of(() -> registerAll(root, watcher, onExistingFile))) {
+      case Try.Value<Object>(var value) -> { break; }
+      case Try.Error(var ex) -> { return; }
+    };
+    
+    while (true) {
+
+      var watchKey = switch(Try.of(watcher::take)) {
+        case Try.Value<WatchKey>(var value) -> value;
+        case Try.Error(var ex) -> null;
+      };
+      if (watchKey == null) break;
+
+      // more later: https://howtodoinjava.com/java8/java-8-watchservice-api-tutorial/
+
+      
+    //   for (var event: watchKey.pollEvents()) {
+    //     event.
+    //     WatchEvent<Path> watchEvent = castEvent(event);
+    //     watchKey.reset();
+    // }
+    }
+  };
+
+  /**
+   * Register the given directory and all its sub-directories with the WatchService.
+   */
+  private void registerAll(Path start, WatchService watcher, Consumer<Path> onExistingFile) throws IOException {
+    // register directory and sub-directories
+    Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                throws IOException {
+            dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            Files.list(dir).filter(Files::isRegularFile).forEach(onExistingFile);
+            return FileVisitResult.CONTINUE;
+        }
+
+    });
+
+  }
 
   @Override
   public void start() {
@@ -61,7 +123,8 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
     isRunning = false;
   }
 
-  private boolean isRunning = false;
+  private volatile boolean isRunning = false;
+
   @Override
   public boolean isRunning() {
     return isRunning;
@@ -69,7 +132,7 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
 
   @Override
   public void close() throws Exception {
-    vExecutor.close();
+    disposer.close();
   }
   
 }

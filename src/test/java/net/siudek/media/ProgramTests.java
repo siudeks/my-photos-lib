@@ -53,9 +53,6 @@ public class ProgramTests {
   static void initClass() {
     var dataPath = Path.of("./data");
     Assertions.assertThat(dataPath.toFile()).exists();
-
-    dogHeic = dataPath.resolve("dog.heic").toFile();
-    Assertions.assertThat(dogHeic).exists();
   }
 
   @Test
