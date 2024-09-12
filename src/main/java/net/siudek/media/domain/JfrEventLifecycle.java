@@ -23,17 +23,17 @@ public class JfrEventLifecycle implements SmartLifecycle {
       if (!isRunning()) {
           running.set(true);
 
-          rs = new RecordingStream(); // (1)
-          rs.enable("jdk.VirtualThreadPinned").withStackTrace(); // (2)
+          rs = new RecordingStream();
+          rs.enable("jdk.VirtualThreadPinned").withStackTrace();
           rs.onEvent(
                   "jdk.VirtualThreadPinned",
-                  ev -> log.warn("Thread pinning detected! {}", ev) // (3)
+                  ev -> log.warn("Thread pinning detected! {}", ev)
           );
 
           // prevents long-running app from memory leaks
-          rs.setMaxAge(Duration.ofSeconds(10)); // (4)
+          rs.setMaxAge(Duration.ofSeconds(10));
 
-          rs.startAsync(); // (5)
+          rs.startAsync();
       }
   }
 

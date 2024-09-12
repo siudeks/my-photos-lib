@@ -1,7 +1,6 @@
 package net.siudek.media.llava;
 
 import java.nio.file.Path;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -33,7 +32,6 @@ import net.siudek.media.ai.OllamaPort;
 import net.siudek.media.ai.OllamaPort.EmbeddingsBody;
 import net.siudek.media.domain.Image;
 import net.siudek.media.domain.ImageUtils;
-import net.siudek.media.domain.MediaFile;
 
 @SpringBootTest(  
   classes = Program.class

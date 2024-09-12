@@ -17,7 +17,7 @@
     <spring-ai.version>1.0.0.M2</spring-ai.version>
     <spring-modulith.version>1.2.3</spring-modulith.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <telegrambots.version>7.10.0</telegrambots.version>
+    <telegrambots.version>7.9.1</telegrambots.version>
   </properties>
 
   <dependencies>

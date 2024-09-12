@@ -26,6 +26,7 @@ public class ImageUtils {
       case "heic" -> new Image.HEIC(image);
       case "sha256" -> new MediaFile.Sha256(image);
       case "desc" -> new MediaFile.Desc(image);
+      case "ignore" -> new MediaFile.Ignore(image);
       default -> throw new IllegalArgumentException("File extension [" + ext + "] is not supported.");
     };
   }
