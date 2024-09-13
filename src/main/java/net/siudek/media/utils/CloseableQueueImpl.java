@@ -3,10 +3,12 @@ package net.siudek.media.utils;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class CloseableQueueImpl<T> implements CloseableQueue<T> {
-  private final BlockingQueue<T> queue = new LinkedBlockingQueue<>();
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-  public void put(T element) throws InterruptedException {
+public class CloseableQueueImpl<T> implements CloseableQueue<T> {
+  private final BlockingQueue<@NonNull T> queue = new LinkedBlockingQueue<>();
+
+  public void put(@NonNull T element) throws InterruptedException {
       queue.put(element);
   }
 

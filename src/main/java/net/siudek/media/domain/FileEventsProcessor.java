@@ -5,6 +5,8 @@ import static java.nio.file.StandardWatchEventKinds.*;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -30,6 +32,7 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
     this.fileEvents = fileEvents;
   }
 
+  private Map<Path, WatchService> watchers = new ConcurrentHashMap<>();
 
   /* Starting point as we have initial applicatio nargs to start the flow. */
   @EventListener
@@ -43,7 +46,6 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
     var fs = root.getFileSystem();
     var watcher = switch(Try.of(fs::newWatchService)) {
       case Try.Value<WatchService>(var value) -> value;
-      case Try.Error(IOException ex) -> null;
       case Try.Error(Exception ex) -> null;
     };
     // if we can't start, lets just return noop
@@ -71,8 +73,8 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
   private void runnable(Path root, WatchService watcher, Consumer<Path> onExistingFile) {
 
     switch(Try.of(() -> registerAll(root, watcher, onExistingFile))) {
-      case Try.Success it -> { break; }
       case Try.Error(var ex) -> { return; }
+      case Try.Success it -> { break; }
     };
     
     while (true) {

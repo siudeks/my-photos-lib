@@ -255,13 +255,11 @@
 							<artifactId>checker</artifactId>
 							<version>3.47.0</version>
 						</path>
-					</annotationProcessorPaths> -->
-					<!-- <annotationProcessors>
+					</annotationProcessorPaths>
+					<annotationProcessors>
 						<annotationProcessor>org.checkerframework.checker.nullness.NullnessChecker</annotationProcessor>
 					</annotationProcessors> -->
 					<compilerArgs>
-						<!-- <arg>-AqualDirs=../module1/target/classes</arg> -->
-						<!-- <arg>-Aquals=org.checkerframework.common.subtyping.qual.Unqualified</arg> -->
 						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
 						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
 						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>

@@ -1,7 +1,9 @@
 package net.siudek.media.utils;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 /** TO simplify dev life we offer only subset of queue methods used in publish / subscribe approach. */
-public interface CloseableQueue<T> {
+public interface CloseableQueue<@NonNull T> {
 
   /**
    * Inserts the specified element into this queue
