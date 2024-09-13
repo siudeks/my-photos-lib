@@ -46,7 +46,7 @@ public class TryTest {
   void guardExample() {
     // invoke some validation method which can raise an exception if method params (not mentioned in the example) are invalid
     // if there is an exception -> do not continue, just return
-    switch(Try.of(this::someValidationMethod)) {
+    switch(Try.run(this::someValidationMethod)) {
       case Try.Success x -> { }
       case Try.Error(var ex) -> { return;}
     };

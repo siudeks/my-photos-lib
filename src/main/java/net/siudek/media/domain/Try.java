@@ -45,7 +45,8 @@ package net.siudek.media.domain;
  */
 sealed interface Try<T> permits Try.TryVoid, Try.TryValue {
 
-  static TryVoid of(Runnable runnable) {
+  /** Try.run() takes a Try.Runnable, which has a void run() method to "perform side-effects". */
+  static TryVoid run(Runnable runnable) {
     try {
       runnable.run();
       return Success.INSTANCE;
@@ -54,6 +55,7 @@ sealed interface Try<T> permits Try.TryVoid, Try.TryValue {
     }
   }
 
+  /** Try.of() takes a Try.Supplier, which has a get() method to "get a result". */
   @SuppressWarnings("unchecked")
   static <T> TryValue<T> of(Supplier<T> supplier) {
     try {

@@ -72,7 +72,7 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
 
   private void runnable(Path root, WatchService watcher, Consumer<Path> onExistingFile) {
 
-    switch(Try.of(() -> registerAll(root, watcher, onExistingFile))) {
+    switch(Try.run(() -> registerAll(root, watcher, onExistingFile))) {
       case Try.Error(var ex) -> { return; }
       case Try.Success it -> { break; }
     };

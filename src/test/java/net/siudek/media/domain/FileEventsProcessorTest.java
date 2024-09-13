@@ -1,6 +1,5 @@
 package net.siudek.media.domain;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -19,14 +18,14 @@ public class FileEventsProcessorTest {
   
   @Test
   @Timeout(unit = TimeUnit.SECONDS, value = 3)
-  void shouldLocateFile(@TempDir Path dir) throws InterruptedException, IOException {
+  void shouldLocateFile(@TempDir Path dir) throws Exception {
 
     var events = new FileEventQueueImpl();
 
     var jpg1 = dir.resolve("1.jpg");
     Files.touch(jpg1.toFile());
 
-    var sut = new FileEventsProcessor(events);
+    try (var sut = new FileEventsProcessor(events)) {
     sut.on(new RunArgs(dir));
 
     Thread.sleep(1000);
@@ -47,6 +46,7 @@ public class FileEventsProcessorTest {
     //   .containsExactlyInAnyOrder(
     //     new FileEvent.Found(new Image.JPG(jpg1)),
     //     new FileEvent.Created(jpg2));
+    }
   }
 
 }
