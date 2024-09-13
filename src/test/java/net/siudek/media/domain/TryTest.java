@@ -3,10 +3,13 @@ package net.siudek.media.domain;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import net.siudek.media.domain.Try.CheckedRunnable;
+import net.siudek.media.domain.Try.CheckedSupplier;
+
 public class TryTest {
   
   @Test
-  void shouldSuccess1() {
+  void shouldValue1() {
     var actual = switch(Try.of(() -> 1)) {
       case Try.Value<Integer>(var value) -> value;
       case Try.Error(var ex) -> 0;
@@ -40,6 +43,17 @@ public class TryTest {
     CheckedSupplier<Integer> s = () -> { throw new IllegalArgumentException(); };
     var actual = switch(Try.of(s)) {
       case Try.Value(var value) -> value;
+      case Try.Error(NullPointerException ex) -> 3;
+      case Try.Error(Exception ex) -> 2;
+    };
+    Assertions.assertThat(actual).isEqualTo(2);
+  }
+
+  @Test
+  void shouldSuccess1() {
+    CheckedRunnable s = () -> { throw new IllegalArgumentException(); };
+    var actual = switch(Try.of(s)) {
+      case Try.Success it -> 1;
       case Try.Error(NullPointerException ex) -> 3;
       case Try.Error(Exception ex) -> 2;
     };
