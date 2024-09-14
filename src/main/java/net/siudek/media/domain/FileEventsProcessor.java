@@ -22,8 +22,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import io.micrometer.observation.Observation.CheckedCallable;
-
 /**
  * Reads initial list of files using {@link MediaSearch} and watches all changes in discovered folders / files.
  * All events has been stored in {@link FileEvents}
@@ -34,7 +32,7 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
 
   private final FileEventQueue fileEvents;
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
-  private final CompositeCloseable disposer = Closeables.of(vExecutor);
+  private final CompositeCloseable disposer = Closeables.of(() -> { vExecutor.shutdownNow(); vExecutor.close(); });
 
   public FileEventsProcessor(FileEventQueue fileEvents) {
     this.fileEvents = fileEvents;

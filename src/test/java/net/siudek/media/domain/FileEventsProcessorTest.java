@@ -9,12 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.Timeout.ThreadMode;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import com.google.common.io.Files;
 
 import net.siudek.media.domain.AppEvent.RunArgs;
 import net.siudek.media.domain.DomainConfigurer.FileEventQueueImpl;
 
+@SpringBootTest(webEnvironment = WebEnvironment.NONE, classes = JfrEventLifecycle.class)
 public class FileEventsProcessorTest {
   
   @Test
