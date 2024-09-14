@@ -2,7 +2,6 @@ package net.siudek.media.telegram;
 
 import java.io.File;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;

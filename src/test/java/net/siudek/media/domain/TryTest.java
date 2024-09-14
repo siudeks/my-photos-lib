@@ -12,7 +12,7 @@ public class TryTest {
   void shouldReturnSupplierValue() {
     var actual = switch (Try.of(() -> 1)) {
       case Try.Value<Integer>(var value) -> value;
-      case Try.Error(var ex) -> 0;
+      case Try.Failure(var ex) -> 0;
     };
     Assertions.assertThat(actual).isEqualTo(1);
   }
@@ -22,7 +22,7 @@ public class TryTest {
   void shouldHandleException() {
     var actual = switch(Try.of(() -> { throw new IllegalArgumentException(); })) {
       case Try.Value(var value) -> value;
-      case Try.Error(var ex) -> 2;
+      case Try.Failure(var ex) -> 2;
     };
     Assertions.assertThat(actual).isEqualTo(2);
   }
@@ -32,8 +32,8 @@ public class TryTest {
   void shouldHandleSpecificException() {
     var actual = switch(Try.of(() -> { throw new IllegalArgumentException(); })) {
       case Try.Value(var value) -> value;
-      case Try.Error(IllegalArgumentException ex) -> 2;
-      case Try.Error(Exception ex) -> 3;
+      case Try.Failure(IllegalArgumentException ex) -> 2;
+      case Try.Failure(Exception ex) -> 3;
      };
      Assertions.assertThat(actual).isEqualTo(2);
  }
@@ -48,10 +48,10 @@ public class TryTest {
     // if there is an exception -> do not continue, just return
     switch(Try.run(this::someValidationMethod)) {
       case Try.Success x -> { }
-      case Try.Error(var ex) -> { return;}
+      case Try.Failure(var ex) -> { return;}
     };
 
-    Assertions.fail("Should not be thrown as we use guard method which stop the flow");
+    Assertions.fail("Should not be thrown as we use guard method which stops the flow");
   }
 
 }

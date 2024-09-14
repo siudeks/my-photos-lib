@@ -118,7 +118,7 @@ class FileActor implements Runnable {
       case Try.Value<HashCode>(HashCode value) -> {
         yield value.toString();
       }
-      case Try.Error(var ex) -> {
+      case Try.Failure(var ex) -> {
         log.error("sha256 calc error", ex);
         yield null;
       }
@@ -130,7 +130,7 @@ class FileActor implements Runnable {
     // read already created hash file, if exists
     var skipChecksum = Files.exists(checksumFile) && switch (Try.of(() -> Files.readAllBytes(checksumFile))) {
       case Try.Value<byte[]>(var value) -> Objects.equal(new String(value), hash);
-      case Try.Error(var ex) -> false;
+      case Try.Failure(var ex) -> false;
     };
 
     if (!skipChecksum) {
@@ -139,7 +139,7 @@ class FileActor implements Runnable {
           // success
           break;
         }
-        case Try.Error(var ex): {
+        case Try.Failure(var ex): {
           log.error("sha256 store error", ex);
         }
       }
@@ -160,7 +160,7 @@ class FileActor implements Runnable {
         // success
         return true;
       }
-      case Try.Error(var ex): {
+      case Try.Failure(var ex): {
         log.error("sha256 store error", ex);
         return false;
       }

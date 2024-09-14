@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.Timeout.ThreadMode;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.io.Files;
@@ -17,7 +18,7 @@ import net.siudek.media.domain.DomainConfigurer.FileEventQueueImpl;
 public class FileEventsProcessorTest {
   
   @Test
-  @Timeout(unit = TimeUnit.SECONDS, value = 3)
+  @Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 3000)
   void shouldLocateFile(@TempDir Path dir) throws Exception {
 
     var events = new FileEventQueueImpl();
@@ -26,26 +27,23 @@ public class FileEventsProcessorTest {
     Files.touch(jpg1.toFile());
 
     try (var sut = new FileEventsProcessor(events)) {
-    sut.on(new RunArgs(dir));
+      sut.on(new RunArgs(dir));
 
-    Thread.sleep(1000);
-    var jpg2 = dir.resolve("2.jpg");
-    Files.touch(jpg2.toFile());
+      var item1 = events.take();
+      Assertions
+        .assertThat(List.of(item1))
+        .containsExactlyInAnyOrder(
+          new FileEvent.Found(new Image.JPG(jpg1)));
 
-    var item1 = events.take();
-    Assertions
-      .assertThat(List.of(item1))
-      .containsExactlyInAnyOrder(
-        new FileEvent.Found(new Image.JPG(jpg1)));
+      var jpg2 = dir.resolve("2.jpg");
+      Files.touch(jpg2.toFile());
+      var item2 = events.take();
 
-
-    // var item1 = events.take();
-    // var item2 = events.take();
-    // Assertions
-    //   .assertThat(List.of(item1, item2))
-    //   .containsExactlyInAnyOrder(
-    //     new FileEvent.Found(new Image.JPG(jpg1)),
-    //     new FileEvent.Created(jpg2));
+      Assertions
+        .assertThat(List.of(item1, item2))
+        .containsExactlyInAnyOrder(
+          new FileEvent.Found(new Image.JPG(jpg1)),
+          new FileEvent.Created(new Image.JPG(jpg2)));
     }
   }
 

@@ -10,7 +10,7 @@ public sealed interface FileEvent {
   }
 
   /** New file has been just created */
-  record Created(Path value) implements FileEvent { }
+  record Created(Image value) implements FileEvent { }
 
   /** Some changed on the file to process. */
   record Changed(Path path) implements FileEvent {
