@@ -30,11 +30,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
 
-  private final FileEventQueue fileEvents;
+  private final ImageEventQueue fileEvents;
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
   private final CompositeCloseable disposer = Closeables.of(() -> { vExecutor.shutdownNow(); vExecutor.close(); });
 
-  public FileEventsProcessor(FileEventQueue fileEvents) {
+  public FileEventsProcessor(ImageEventQueue fileEvents) {
     this.fileEvents = fileEvents;
   }
 
@@ -135,14 +135,14 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
   }
 
   void onFileFound(Path path) {
-    onFile(path, FileEvent.Found::new);
+    onFile(path, ImageEvent.Found::new);
   }
 
   void onFileCreated(Path path) {
-    onFile(path, FileEvent.Created::new);
+    onFile(path, ImageEvent.Created::new);
   }
 
-  void onFile(Path path, Function<Image, FileEvent> toEvent) {
+  void onFile(Path path, Function<Image, ImageEvent> toEvent) {
     var asMedia = ImageUtils.asMediaFile(path);
     switch (asMedia) {
       case Image im: {

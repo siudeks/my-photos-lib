@@ -36,7 +36,7 @@ public class FileEventsProcessorTest {
       Assertions
         .assertThat(List.of(item1))
         .containsExactlyInAnyOrder(
-          new FileEvent.Found(new Image.JPG(jpg1)));
+          new ImageEvent.Found(new Image.JPG(jpg1)));
 
       var jpg2 = dir.resolve("2.jpg");
       Files.touch(jpg2.toFile());
@@ -45,8 +45,8 @@ public class FileEventsProcessorTest {
       Assertions
         .assertThat(List.of(item1, item2))
         .containsExactlyInAnyOrder(
-          new FileEvent.Found(new Image.JPG(jpg1)),
-          new FileEvent.Created(new Image.JPG(jpg2)));
+          new ImageEvent.Found(new Image.JPG(jpg1)),
+          new ImageEvent.Created(new Image.JPG(jpg2)));
     }
   }
 
