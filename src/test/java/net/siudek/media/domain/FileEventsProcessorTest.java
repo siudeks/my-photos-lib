@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import com.google.common.io.Files;
 
 import net.siudek.media.domain.AppEvent.RunArgs;
-import net.siudek.media.domain.DomainConfigurer.FileEventQueueImpl;
+import net.siudek.media.domain.DomainConfigurer.ImageEventQueueImpl;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE, classes = JfrEventLifecycle.class)
 public class FileEventsProcessorTest {
@@ -24,7 +24,7 @@ public class FileEventsProcessorTest {
   @Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 3000)
   void shouldLocateFile(@TempDir Path dir) throws Exception {
 
-    var events = new FileEventQueueImpl();
+    var events = new ImageEventQueueImpl();
 
     var jpg1 = dir.resolve("1.jpg");
     Files.touch(jpg1.toFile());

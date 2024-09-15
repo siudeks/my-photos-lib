@@ -68,12 +68,6 @@ public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable
         case ImageEvent.Created it: {
           break;
         }
-        case ImageEvent.Changed it: {
-          break;
-        }
-        case ImageEvent.Deleted it: {
-          break;
-        }
         }
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();

@@ -11,11 +11,19 @@ import net.siudek.media.utils.CloseableQueueImpl;
 public class DomainConfigurer {
   
   @Bean
-  ImageEventQueue fileEvents() {
+  ImageEventQueue imageEventQueue() {
+    return new ImageEventQueueImpl();
+  }
+
+  @Bean
+  FileEventQueue fileEventQueue() {
     return new FileEventQueueImpl();
   }
 
-  public static class FileEventQueueImpl extends CloseableQueueImpl<ImageEvent> implements ImageEventQueue {
+  public static class ImageEventQueueImpl extends CloseableQueueImpl<ImageEvent> implements ImageEventQueue {
+  };
+
+  public static class FileEventQueueImpl extends CloseableQueueImpl<FileEvent> implements FileEventQueue {
   };
 
 }

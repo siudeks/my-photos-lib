@@ -10,12 +10,4 @@ public sealed interface ImageEvent {
   /** New file has been just created */
   record Created(Image value) implements ImageEvent { }
 
-  /** Some changed on the file to process. */
-  record Changed(Image path) implements ImageEvent {
-  }
-
-  /** File has been deleted. */
-  record Deleted(Image path) implements ImageEvent {
-  }
-
 }
