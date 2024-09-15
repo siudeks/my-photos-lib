@@ -30,11 +30,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
 
-  private final ImageEventQueue fileEvents;
+  private final FileEventQueue fileEvents;
   private final ExecutorService vExecutor = Executors.newVirtualThreadPerTaskExecutor();
   private final CompositeCloseable disposer = Closeables.of(() -> { vExecutor.shutdownNow(); vExecutor.close(); });
 
-  public FileEventsProcessor(ImageEventQueue fileEvents) {
+  public FileEventsProcessor(FileEventQueue fileEvents) {
     this.fileEvents = fileEvents;
   }
 
@@ -135,26 +135,20 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
   }
 
   void onFileFound(Path path) {
-    onFile(path, ImageEvent.Found::new);
+    onFile(path, FileEvent.FoundFile::new);
   }
 
   void onFileCreated(Path path) {
-    onFile(path, ImageEvent.Created::new);
+    onFile(path, FileEvent.FoundFile::new);
   }
 
-  void onFile(Path path, Function<Image, ImageEvent> toEvent) {
-    var asMedia = ImageUtils.asMediaFile(path);
-    switch (asMedia) {
-      case Image im: {
-        try {
-          var event = toEvent.apply(im);
-          fileEvents.put(event);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          // no idea what to do else ... TODO
-        }
-      }
-      default: break;
+  void onFile(Path path, Function<Path, FileEvent> toEvent) {
+    var event = toEvent.apply(path);
+    try {
+      fileEvents.put(event);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   };
 
@@ -165,31 +159,10 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
       case Try.Failure(var ex) -> { return; } // no sense to continue
       case Try.Success it -> { } // just continue
     };
-    
-    // while (true) {
-
-      // wait for all threads 
-      // var watchKey = switch(Try.of(watcher::take)) {
-      //   case Try.Value<WatchKey>(var value) -> value;
-      //   case Try.Failure(var ex) -> null;
-      // };
-      // if (watchKey == null) break;
-
-      // more later: https://howtodoinjava.com/java8/java-8-watchservice-api-tutorial/
-
-      
-    //   for (var event: watchKey.pollEvents()) {
-    //     event.
-    //     WatchEvent<Path> watchEvent = castEvent(event);
-    //     watchKey.reset();
-    // }
-    // }
-    // };
-
   }
 
   /**
-   * Register the given directory and all its sub-directories with the WatchService.
+   * Reports found dirs and files. Useful to visit root path, or newly created paths.
    */
   private void registerAll(Path start, Consumer<Path> onDir, Consumer<Path> onFile) throws IOException {
     // register directory, sub-directories and files

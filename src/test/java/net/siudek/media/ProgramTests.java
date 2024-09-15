@@ -38,7 +38,7 @@ import net.siudek.media.utils.SafeCloseable;
 )
 @DirtiesContext
 @Import(value = ProgramTests.MyListener.class)
-@Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 300)
+@Timeout(threadMode = ThreadMode.SEPARATE_THREAD, unit = TimeUnit.SECONDS, value = 3)
 public class ProgramTests {
 
   @Autowired

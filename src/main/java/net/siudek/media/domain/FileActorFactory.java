@@ -20,9 +20,9 @@ import org.springframework.stereotype.Component;
 public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable {
 
   static Logger log = LoggerFactory.getLogger(FileActorFactory.class);
-  private final ImageEventQueue fileEvents;
+  private final ImageEventQueue imageEvents;
   public FileActorFactory(ImageEventQueue fileEvents, StateListeners stateListeners, ImageDescService imageDescService, VectorStore vectorStore) {
-    this.fileEvents = fileEvents;
+    this.imageEvents = fileEvents;
     this.stateListeners = stateListeners;
     this.imageDescService = imageDescService;
     this.vectorStore = vectorStore;
@@ -43,7 +43,7 @@ public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable
   public void run() {
     while (true) {
       try {
-        var event = fileEvents.take();
+        var event = imageEvents.take();
         switch (event) {
         case ImageEvent.Found it: {
           var actorId = it.path();
@@ -63,9 +63,6 @@ public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable
               throw ex;
             }
           });
-          break;
-        }
-        case ImageEvent.Created it: {
           break;
         }
         }

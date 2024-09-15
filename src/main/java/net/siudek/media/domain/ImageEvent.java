@@ -8,6 +8,6 @@ public sealed interface ImageEvent {
   }
 
   /** New file has been just created */
-  record Created(Image value) implements ImageEvent { }
+  // record Created(Image value) implements ImageEvent { }
 
 }
