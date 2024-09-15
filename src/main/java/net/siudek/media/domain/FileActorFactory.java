@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -46,7 +47,7 @@ public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable
         switch (event) {
         case FileEvent.Found it: {
           var actorId = it.path();
-          actors.compute(actorId, (Image key, LinkedBlockingQueue<FileActor.Command> b) -> {
+          actors.compute(actorId, (Image key, @Nullable LinkedBlockingQueue<FileActor.Command> b) -> {
             if (b != null) {
               throw new IllegalStateException("Found already processed file.");
             }

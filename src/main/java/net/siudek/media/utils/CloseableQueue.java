@@ -11,7 +11,7 @@ public interface CloseableQueue<@NonNull T> {
    * @param e the element to add
    * @throws InterruptedException if interrupted while waiting
    */
-  void put(T e) throws InterruptedException;
+  void put(@NonNull T e) throws InterruptedException;
 
   T take() throws InterruptedException;
 }

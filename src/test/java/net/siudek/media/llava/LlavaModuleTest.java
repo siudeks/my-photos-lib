@@ -59,8 +59,8 @@ public class LlavaModuleTest {
 
     Models.assureModelsAvailable(ollamaService.list());
 
-    // var mediaFile = "./data/cat.png";
-    var mediaFile = "./data/dog.heic";
+    var mediaFile = "./data/cat.png";
+    // var mediaFile = "./data/dog.heic";
 
     var mediaPath = Path.of(mediaFile);
     Assertions.assertThat(mediaPath).exists();

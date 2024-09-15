@@ -1,6 +1,8 @@
 package net.siudek.media.domain;
 
 import jdk.jfr.consumer.RecordingStream;
+
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
@@ -16,7 +18,8 @@ public class JfrEventLifecycle implements SmartLifecycle {
   private static final Logger log = LoggerFactory.getLogger(JfrEventLifecycle.class);
 
   private final AtomicBoolean running = new AtomicBoolean(false);
-  private RecordingStream rs;
+  private CompositeCloseable disposer = new CompositeCloseable();
+  private @MonotonicNonNull RecordingStream rs;
 
   @Override
   public void start() {
@@ -24,6 +27,7 @@ public class JfrEventLifecycle implements SmartLifecycle {
           running.set(true);
 
           rs = new RecordingStream();
+          disposer.add(rs);
           rs.enable("jdk.VirtualThreadPinned").withStackTrace();
           rs.onEvent(
                   "jdk.VirtualThreadPinned",
@@ -40,7 +44,7 @@ public class JfrEventLifecycle implements SmartLifecycle {
   @Override
   public void stop() {
       if (isRunning()) {
-          rs.close();
+          disposer.close();
           running.set(false);
       }
   }

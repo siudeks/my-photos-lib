@@ -79,6 +79,7 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle, Au
 
   @Override
   public void stop() {
+    vExecutor.shutdownNow();
     vExecutor.close();
     isRunning = false;
   }
@@ -100,6 +101,7 @@ class LlavaServiceImpl implements ImageDescService, Runnable, SmartLifecycle, Au
 
   @Override
   public void close() throws Exception {
+    vExecutor.shutdownNow();
     vExecutor.close();
   }
 

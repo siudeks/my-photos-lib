@@ -1,7 +1,11 @@
 package net.siudek.media.telegram;
 
 import java.io.File;
+import java.util.HashMap;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
@@ -13,6 +17,8 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import com.google.errorprone.annotations.concurrent.LazyInit;
 
 import jakarta.annotation.PostConstruct;
 
@@ -29,9 +35,10 @@ public class MyAmazingBot implements UpdateConsumer {
       this.vectorStore = vectorStore;
     }
 
-    private TelegramClient telegramClient;
+    private @LazyInit @MonotonicNonNull TelegramClient telegramClient;
 
     @PostConstruct
+    @EnsuresNonNull("telegramClient")
     public void init() throws TelegramApiException {
         var token = telegramProperties.secret();
         telegramClient = new OkHttpTelegramClient(token);

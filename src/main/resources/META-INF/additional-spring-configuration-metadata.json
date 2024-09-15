@@ -1,5 +1,17 @@
-{"properties": [{
-  "name": "app.folders",
-  "type": "java.lang.String",
-  "description": "list of folders, separated by semicolon where application has to analyze media files"
-}]}
+{"properties": [
+  {
+    "name": "app.folders",
+    "type": "java.lang.String",
+    "description": "list of folders, separated by semicolon where application has to analyze media files"
+  },
+  {
+    "name": "ENV_TELEGRAM_SECRET",
+    "type": "java.lang.String",
+    "description": "A description for 'ENV_TELEGRAM_SECRET'"
+  },
+  {
+    "name": "ENV_OLLAMA_HOST",
+    "type": "java.lang.String",
+    "description": "A description for 'ENV_OLLAMA_HOST'"
+  }
+]}
