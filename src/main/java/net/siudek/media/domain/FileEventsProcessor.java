@@ -61,8 +61,7 @@ public class FileEventsProcessor implements AutoCloseable, SmartLifecycle {
       try {
         processEvents(watcher);
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        Thread.currentThread().interrupt();
       }
     };
   }

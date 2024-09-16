@@ -93,6 +93,7 @@ public class FileActorFactory implements Runnable, SmartLifecycle, AutoCloseable
 
   @Override
   public void close() throws Exception {
+    this.executorService.shutdownNow();
     this.executorService.close();
   }
 

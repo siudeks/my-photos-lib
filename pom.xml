@@ -244,7 +244,7 @@
 				<version>3.13.0</version>
 				<configuration>
 					<release>21</release>
-					<fork>true</fork> <!-- Must fork or else JVM arguments are ignored. -->
+					<fork>true</fork> Must fork or else JVM arguments are ignored.
 					<compilerArgs>
 						<Xmaxerrs>10000</Xmaxerrs>
 						<Xmaxwarns>10000</Xmaxwarns>

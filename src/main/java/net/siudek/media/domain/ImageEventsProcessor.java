@@ -36,6 +36,10 @@ public class ImageEventsProcessor implements AutoCloseable, SmartLifecycle {
         var asMedia = ImageUtils.asMediaFile(asPath);
         switch (asMedia) {
           case Image im: {
+            var je = new Events.ImageFound(asPath.toString());
+            je.begin();
+            je.end();
+            je.commit();
             try {
               var event = new ImageEvent.Found(im);
               imageEvents.put(event);
