@@ -42,3 +42,6 @@ sudo docker run -d -p 3000:8080 \
 Alternative boot:
 https://github.com/Bindambc/whatsapp-business-java-api?tab=readme-ov-file#eyes-overview
 
+Azure SQL + OpenAI
+https://www.youtube.com/watch?v=LRqZhdQlqC0
+
