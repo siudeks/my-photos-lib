@@ -2,6 +2,8 @@ package net.siudek.media.telegram;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
@@ -10,10 +12,12 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.longpolling.BotSession;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -23,11 +27,12 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import jakarta.annotation.PostConstruct;
 
 @Component
-public class MyAmazingBot implements UpdateConsumer {
+public class MyAmazingBot implements UpdateConsumer, AutoCloseable {
 
     private final TelegramBotsLongPollingApplication telegramBotsLongPollingApplication;
     private final TelegramProperties telegramProperties;
     private final VectorStore vectorStore;
+    private BotSession botSession;
 
     public MyAmazingBot(TelegramBotsLongPollingApplication telegramBotsLongPollingApplication, TelegramProperties telegramProperties, VectorStore vectorStore) {
       this.telegramBotsLongPollingApplication = telegramBotsLongPollingApplication;
@@ -42,11 +47,15 @@ public class MyAmazingBot implements UpdateConsumer {
     public void init() throws TelegramApiException {
         var token = telegramProperties.secret();
         telegramClient = new OkHttpTelegramClient(token);
-        telegramBotsLongPollingApplication.registerBot(token, this);
+        botSession = telegramBotsLongPollingApplication.registerBot(token, this);
     }
 
     @Override
     public void consume(Update update) throws TelegramApiException {
+
+        List<PhotoSize> photos = update.getMessage().getPhoto();
+        Optional.ofNullable(photos);
+
         var hasMessage = update.hasMessage() && update.getMessage().hasText();
         if (!hasMessage)
             return;
@@ -59,6 +68,7 @@ public class MyAmazingBot implements UpdateConsumer {
         String message_text = update.getMessage().getText();
         long chat_id = update.getMessage().getChatId();
 
+        // read images
 
         var docs = vectorStore.similaritySearch(
           SearchRequest.defaults()
@@ -81,5 +91,11 @@ public class MyAmazingBot implements UpdateConsumer {
           telegramClient.execute(responseMsg);
       }
 
+    }
+
+    @Override
+    public void close() throws Exception {
+
+      botSession.close();
     }
 }

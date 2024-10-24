@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.3</version>
+    <version>3.3.4</version>
     <relativePath />
   </parent>
   <groupId>net.siudek</groupId>
@@ -13,11 +13,12 @@
   <description>Demo project for Spring Boot</description>
 
   <properties>
-    <java.version>21</java.version>
+    <java.version>22</java.version>
     <spring-ai.version>1.0.0.M2</spring-ai.version>
     <spring-modulith.version>1.2.3</spring-modulith.version>
     <jsr305.version>3.0.2</jsr305.version>
     <telegrambots.version>7.9.1</telegrambots.version>
+    <jspecify.version>1.0.0</jspecify.version>
   </properties>
 
   <dependencies>
@@ -175,19 +176,18 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>${jspecify.version}</version>
+    </dependency>
+
+
+    <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
       <scope>runtime</scope>
     </dependency>
 
-
-    <!-- Annotations from the Checker Framework: nullness, interning, locking, ... -->
-    <dependency>
-      <groupId>org.checkerframework</groupId>
-      <artifactId>checker-qual</artifactId>
-      <version>3.47.0</version>
-    </dependency>
-  
 
   </dependencies>
 
@@ -239,42 +239,6 @@
         </plugin>
        
 
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
-				<configuration>
-					<release>21</release>
-					<fork>true</fork> Must fork or else JVM arguments are ignored.
-					<compilerArgs>
-						<Xmaxerrs>10000</Xmaxerrs>
-						<Xmaxwarns>10000</Xmaxwarns>
-					</compilerArgs>
-					<!-- <annotationProcessorPaths>
-						<path>
-							<groupId>org.checkerframework</groupId>
-							<artifactId>checker</artifactId>
-							<version>3.47.0</version>
-						</path>
-					</annotationProcessorPaths>
-					<annotationProcessors>
-						<annotationProcessor>org.checkerframework.checker.nullness.NullnessChecker</annotationProcessor>
-					</annotationProcessors> -->
-					<compilerArgs>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-						<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-					</compilerArgs>
-				</configuration>
-			</plugin>
-
-      
-             
     </plugins>
   </build>
   <repositories>
